@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -37,17 +38,19 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsDownloaded = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsInstalled = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsEnabled = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
+            this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.VersionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsDownloadedColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsInstalledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsEnabledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -136,6 +139,7 @@
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
+            this.dataGridView1.AutoGenerateColumns = false;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -146,12 +150,13 @@
             this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column1,
-            this.Column2,
-            this.IsDownloaded,
-            this.IsInstalled,
-            this.IsEnabled});
+            this.NameColumn,
+            this.VersionColumn,
+            this.IsDownloadedColumn,
+            this.IsInstalledColumn,
+            this.IsEnabledColumn});
             this.tableLayoutPanel1.SetColumnSpan(this.dataGridView1, 3);
+            this.dataGridView1.DataSource = this.bindingSource1;
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.Location = new System.Drawing.Point(3, 3);
             this.dataGridView1.Name = "dataGridView1";
@@ -162,48 +167,53 @@
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             // 
-            // Column1
+            // NameColumn
             // 
-            this.Column1.HeaderText = "Mod Name";
-            this.Column1.MinimumWidth = 6;
-            this.Column1.Name = "Column1";
-            this.Column1.ReadOnly = true;
-            this.Column1.Width = 250;
+            this.NameColumn.DataPropertyName = "Name";
+            this.NameColumn.HeaderText = "Mod Name";
+            this.NameColumn.MinimumWidth = 6;
+            this.NameColumn.Name = "NameColumn";
+            this.NameColumn.ReadOnly = true;
+            this.NameColumn.Width = 250;
             // 
-            // Column2
+            // VersionColumn
             // 
-            this.Column2.HeaderText = "Version";
-            this.Column2.MinimumWidth = 6;
-            this.Column2.Name = "Column2";
-            this.Column2.ReadOnly = true;
-            this.Column2.Width = 75;
+            this.VersionColumn.DataPropertyName = "Version";
+            this.VersionColumn.HeaderText = "Version";
+            this.VersionColumn.MinimumWidth = 6;
+            this.VersionColumn.Name = "VersionColumn";
+            this.VersionColumn.ReadOnly = true;
+            this.VersionColumn.Width = 75;
             // 
-            // IsDownloaded
+            // IsDownloadedColumn
             // 
-            this.IsDownloaded.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.IsDownloaded.HeaderText = "Downloaded?";
-            this.IsDownloaded.MinimumWidth = 6;
-            this.IsDownloaded.Name = "IsDownloaded";
-            this.IsDownloaded.ReadOnly = true;
-            this.IsDownloaded.Width = 110;
+            this.IsDownloadedColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.IsDownloadedColumn.DataPropertyName = "IsDownloaded";
+            this.IsDownloadedColumn.HeaderText = "Downloaded?";
+            this.IsDownloadedColumn.MinimumWidth = 6;
+            this.IsDownloadedColumn.Name = "IsDownloadedColumn";
+            this.IsDownloadedColumn.ReadOnly = true;
+            this.IsDownloadedColumn.Width = 110;
             // 
-            // IsInstalled
+            // IsInstalledColumn
             // 
-            this.IsInstalled.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.IsInstalled.HeaderText = "Installed?";
-            this.IsInstalled.MinimumWidth = 6;
-            this.IsInstalled.Name = "IsInstalled";
-            this.IsInstalled.ReadOnly = true;
-            this.IsInstalled.Width = 90;
+            this.IsInstalledColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.IsInstalledColumn.DataPropertyName = "IsInstalled";
+            this.IsInstalledColumn.HeaderText = "Installed?";
+            this.IsInstalledColumn.MinimumWidth = 6;
+            this.IsInstalledColumn.Name = "IsInstalledColumn";
+            this.IsInstalledColumn.ReadOnly = true;
+            this.IsInstalledColumn.Width = 90;
             // 
-            // IsEnabled
+            // IsEnabledColumn
             // 
-            this.IsEnabled.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.IsEnabled.HeaderText = "Enabled?";
-            this.IsEnabled.MinimumWidth = 6;
-            this.IsEnabled.Name = "IsEnabled";
-            this.IsEnabled.ReadOnly = true;
-            this.IsEnabled.Width = 90;
+            this.IsEnabledColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.IsEnabledColumn.DataPropertyName = "IsEnabled";
+            this.IsEnabledColumn.HeaderText = "Enabled?";
+            this.IsEnabledColumn.MinimumWidth = 6;
+            this.IsEnabledColumn.Name = "IsEnabledColumn";
+            this.IsEnabledColumn.ReadOnly = true;
+            this.IsEnabledColumn.Width = 90;
             // 
             // Form1
             // 
@@ -222,6 +232,7 @@
             this.tabPage1.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -237,11 +248,12 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn IsDownloaded;
-        private System.Windows.Forms.DataGridViewTextBoxColumn IsInstalled;
-        private System.Windows.Forms.DataGridViewTextBoxColumn IsEnabled;
+        private System.Windows.Forms.BindingSource bindingSource1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn VersionColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn IsDownloadedColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn IsInstalledColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn IsEnabledColumn;
     }
 }
 

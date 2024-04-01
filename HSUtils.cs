@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,7 +15,7 @@ namespace HalfSwordModInstaller
         public const int HSSteamAppID = 2642680;
         public static string HSInstallPath = GetGameInstallPath(HSSteamAppID);
         public static string HSBinaryPath = Path.Combine(HSInstallPath, "HalfSwordUE5\\Binaries\\Win64");
-        public static string HSLogicModsPath = Path.Combine(HSBinaryPath, "\\..\\..\\Content\\Paks\\LogicMods");
+        public static string HSLogicModsPath = Path.GetFullPath(Path.Combine(HSBinaryPath, "..\\..\\Content\\Paks\\LogicMods"));
         public static string HSUE4SSModsTxt = Path.Combine(HSBinaryPath, "Mods", "mods.txt");
 
         public static string GetGameInstallPath(int appId)
@@ -89,6 +90,14 @@ namespace HalfSwordModInstaller
             }
         }
 
+        public static void ForceExtractToDirectory(string archiveFileName, string destinationDirectoryName)
+        {
+            using (ZipArchive archive = ZipFile.OpenRead(archiveFileName))
+            {
+                archive.ExtractToDirectory(destinationDirectoryName, true); // Set to 'true' to overwrite
+            }
+        }
+
         public HSUtils()
         {
             if (!Directory.Exists(HSModInstallerDirPath))
@@ -98,4 +107,39 @@ namespace HalfSwordModInstaller
         }
 
     }
+
+    public static class ZipFileExtensions
+    {
+        public static void ExtractToDirectory(this ZipArchive archive, string destinationDirectoryName, bool overwrite)
+        {
+            string destinationDirectoryFullPath = Path.GetFullPath(destinationDirectoryName);
+            if (!overwrite)
+            {
+                archive.ExtractToDirectory(destinationDirectoryName);
+                return;
+            }
+
+            foreach (ZipArchiveEntry file in archive.Entries)
+            {
+                string completeFileName = Path.GetFullPath(Path.Combine(destinationDirectoryName, file.FullName));
+                string directory = Path.GetDirectoryName(completeFileName);
+
+                if (!completeFileName.StartsWith(destinationDirectoryFullPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new IOException("Trying to extract file outside of destination directory, aborting.");
+                }
+
+                // if (!Directory.Exists(directory))
+                // {
+                Directory.CreateDirectory(directory);
+                // }
+
+                if (file.Name != "")
+                {
+                    file.ExtractToFile(completeFileName, true);
+                }
+            }
+        }
+    }
+
 }

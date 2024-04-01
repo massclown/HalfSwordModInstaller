@@ -1,14 +1,17 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 
 namespace HalfSwordModInstaller
 {
-    public class HSUE4SS : HSMod
+    public class HSUE4SS : HSInstallable
     {
-        public HSUE4SS() : base("UE4SS", "https://github.com/UE4SS-RE/RE-UE4SS", false)
+        public HSUE4SS() : base("UE4SS", "https://github.com/UE4SS-RE/RE-UE4SS")
         {
         }
+
+        public new const string RelativePath = "";
 
         public new void LogMe()
         {
@@ -19,20 +22,32 @@ namespace HalfSwordModInstaller
                 );
         }
 
-        public new void Install()
+        public override void Install()
         {
             if (!IsDownloaded)
             {
                 Download();
             }
             string unzipFolder = HSUtils.HSBinaryPath;
-            ZipFile.ExtractToDirectory(LocalZipPath, unzipFolder);
+            HSUtils.ForceExtractToDirectory(LocalZipPath, unzipFolder);
+
+            // patch "GraphicsAPI = opengl" in UE4SS-settings.ini
+            var UE4SSSettingsIni = Path.Combine(HSUtils.HSBinaryPath, "UE4SS-settings.ini");
+            var lines = File.ReadAllLines(UE4SSSettingsIni).ToList();
+            int keyIndex = lines.FindIndex(line => line.StartsWith("GraphicsAPI = "));
+
+            if (keyIndex != -1)
+            {
+                lines[keyIndex] = "GraphicsAPI = d3d11";
+                File.WriteAllLines(UE4SSSettingsIni, lines);
+            }
+
             HSUtils.Log($"Installed UE4SS from \"{LocalZipPath}\" to \"{unzipFolder}\"");
         }
 
         // We actually delete only the files that may affect the game's execution
         // Readmes and other things are left alone
-        public new void Uninstall()
+        public override void Uninstall()
         {
             string[] filePaths =
             {
@@ -85,14 +100,14 @@ namespace HalfSwordModInstaller
             HSUtils.Log($"Uninstalled UE4SS");
         }
 
-        public new void Update()
+        public override void Update()
         {
             Uninstall();
             Install();
             HSUtils.Log($"Updated UE4SS");
         }
 
-        public new bool IsInstalled
+        public override bool IsInstalled
         {
             get
             {
@@ -128,7 +143,7 @@ namespace HalfSwordModInstaller
             }
         }
 
-        public new bool IsEnabled
+        public override bool IsEnabled
         {
             get
             {
@@ -167,7 +182,7 @@ namespace HalfSwordModInstaller
             }
         }
 
-        public new void SetEnabled(bool isEnabled)
+        public override void SetEnabled(bool isEnabled)
         {
             string dllBak, dllOK;
 
