@@ -117,17 +117,26 @@ namespace HalfSwordModInstaller
                             }
                             else
                             {
+                                // Install handles downloading automatically, so just install anyway.
                                 mod.Install();
                             }
                             break;
                         case "enableButton":
-                            if (mod.IsEnabled)
+                            if (!mod.IsInstalled)
                             {
-                                mod.SetEnabled(false);
+                                // TODO Ask to install it first and abort.
+                                MessageBox.Show("Please install first");
                             }
                             else
-                            {
-                                mod.SetEnabled(true);
+                            { 
+                                if (mod.IsEnabled)
+                                {
+                                    mod.SetEnabled(false);
+                                }
+                                else
+                                {
+                                    mod.SetEnabled(true);
+                                }
                             }
                             break;
                         default:
