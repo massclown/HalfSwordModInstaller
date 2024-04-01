@@ -14,7 +14,7 @@ namespace HalfSwordModInstaller
         {
             HSUtils.Log($"UE4SS=\"{Name}\", Url=\"{Url}\", Version=\"{Version}\", " +
                 $"Downloaded={IsDownloaded}, Installed={IsInstalled}, " +
-                $"InstalledVersion={(string.IsNullOrEmpty(InstalledVersion) ? "null" : "\""+InstalledVersion+"\"")}, " +
+                $"InstalledVersion={(string.IsNullOrEmpty(InstalledVersion) ? "null" : "\"" + InstalledVersion + "\"")}, " +
                 $"Enabled={IsEnabled}"
                 );
         }
@@ -27,6 +27,7 @@ namespace HalfSwordModInstaller
             }
             string unzipFolder = HSUtils.HSBinaryPath;
             ZipFile.ExtractToDirectory(LocalZipPath, unzipFolder);
+            HSUtils.Log($"Installed UE4SS from \"{LocalZipPath}\" to \"{unzipFolder}\"");
         }
 
         // We actually delete only the files that may affect the game's execution
@@ -81,12 +82,14 @@ namespace HalfSwordModInstaller
                     }
                 }
             }
+            HSUtils.Log($"Uninstalled UE4SS");
         }
 
         public new void Update()
         {
             Uninstall();
-            Install();            
+            Install();
+            HSUtils.Log($"Updated UE4SS");
         }
 
         public new bool IsInstalled
@@ -199,6 +202,7 @@ namespace HalfSwordModInstaller
                 {
                     throw new Exception("UE4SS installation is broken!");
                 }
+                HSUtils.Log($"Enabled UE4SS");
             }
             else
             {
@@ -214,6 +218,7 @@ namespace HalfSwordModInstaller
                 {
                     throw new Exception("UE4SS installation is broken!");
                 }
+                HSUtils.Log($"Disabled UE4SS");
             }
             _isEnabled = isEnabled;
         }

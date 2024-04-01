@@ -55,7 +55,7 @@ namespace HalfSwordModInstaller
                     NullValue = "Download"
                 }
             };
-            this.dataGridView1.Columns.Insert(2,downloadButtonColumn);
+            this.dataGridView1.Columns.Insert(2, downloadButtonColumn);
 
             var installButtonColumn = new DataGridViewButtonColumn()
             {
@@ -85,7 +85,7 @@ namespace HalfSwordModInstaller
             {
                 this.dataGridView1.Rows.Add(mod.Name, mod.Version);
             }
-            
+
         }
 
         private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -95,18 +95,23 @@ namespace HalfSwordModInstaller
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dataGridView1[e.ColumnIndex, e.RowIndex] is DataGridViewButtonCell cell)
+            if (e.RowIndex < dataGridView1.RowCount && e.RowIndex >= 0 &&
+                e.ColumnIndex < dataGridView1.ColumnCount && e.ColumnIndex >= 0)
             {
-                /*
-                if (cell.Value == null || cell.Value == cell.OwningColumn.DefaultCellStyle.NullValue)
+                if (dataGridView1[e.ColumnIndex, e.RowIndex] is DataGridViewButtonCell cell)
                 {
-                    cell.Value = "Clicked";
+                    switch (dataGridView1.Columns[e.ColumnIndex].Name)
+                    {
+                        case "downloadButton":
+                            break;
+                        case "installButton":
+                            break;
+                        case "enableButton":
+                            break;
+                        default:
+                            break;
+                    }
                 }
-                else
-                {
-                    cell.Value = cell.OwningColumn.DefaultCellStyle.NullValue;
-                }
-                */
             }
         }
     }

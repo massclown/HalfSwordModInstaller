@@ -100,23 +100,30 @@ namespace HalfSwordModInstaller
         {
             get
             {
-                var lines = File.ReadAllLines(HSUtils.HSUE4SSModsTxt).ToList();
-                int thisModIndex = lines.FindIndex(line => line.Contains(Name));
-                if (thisModIndex < 0)
+                if (File.Exists(HSUtils.HSUE4SSModsTxt))
                 {
-                    _isEnabled = false;
-                }
-                else
-                {
-                    int thisModIndexEnabled = lines.FindIndex(line => line.Trim().Equals($"{Name} : 1"));
-                    if (thisModIndexEnabled < 0)
+                    var lines = File.ReadAllLines(HSUtils.HSUE4SSModsTxt).ToList();
+                    int thisModIndex = lines.FindIndex(line => line.Contains(Name));
+                    if (thisModIndex < 0)
                     {
                         _isEnabled = false;
                     }
                     else
                     {
-                        _isEnabled = true;
+                        int thisModIndexEnabled = lines.FindIndex(line => line.Trim().Equals($"{Name} : 1"));
+                        if (thisModIndexEnabled < 0)
+                        {
+                            _isEnabled = false;
+                        }
+                        else
+                        {
+                            _isEnabled = true;
+                        }
                     }
+                }
+                else
+                {
+                    _isEnabled = false;
                 }
                 return _isEnabled;
             }
@@ -223,6 +230,7 @@ namespace HalfSwordModInstaller
                 LocalZipPath = releaseZipPath;
                 _isDownloaded = true;
                 Version = tag;
+                HSUtils.Log($"Downloaded mod \"{Name}\" from \"{downloadUrl}\" to \"{releaseZipPath}\"");
             }
         }
 
@@ -255,6 +263,7 @@ namespace HalfSwordModInstaller
                     );
             }
             InstalledVersion = Version;
+            HSUtils.Log($"Installed mod \"{Name}\" from \"{LocalZipPath}\" to \"{unzipFolder}\"");
         }
 
         public void Uninstall()
@@ -274,6 +283,14 @@ namespace HalfSwordModInstaller
             if (HasLogicMods)
             {
                 EditModsTxt("BPModLoaderMod", isEnabled);
+            }
+            if (isEnabled)
+            {
+                HSUtils.Log($"Enabled \"{Name}\"");
+            }
+            else
+            {
+                HSUtils.Log($"Disabled \"{Name}\"");
             }
         }
 
