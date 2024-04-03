@@ -59,7 +59,7 @@ namespace HalfSwordModInstaller
                 }
             }
 
-            throw new InvalidOperationException($"Steam game with App ID {appId} is not installed or not found.");
+            throw new InvalidOperationException($"[ERROR] Steam game with App ID {appId} is not installed or not found.");
         }
         public static string HSModInstallerDirPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

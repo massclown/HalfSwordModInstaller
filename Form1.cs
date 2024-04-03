@@ -37,11 +37,11 @@ namespace HalfSwordModInstaller
             mods.Add(UE4SS);
             UE4SS.LogMe();
 
-            HSMod HSTM = new HSMod("HalfSwordTrainerMod", "https://github.com/massclown/HalfSwordTrainerMod", true);
+            HSMod HSTM = new HSMod("HalfSwordTrainerMod", "https://github.com/massclown/HalfSwordTrainerMod", true, new List<HSInstallable>() { UE4SS });
             mods.Add(HSTM);
             HSTM.LogMe();
 
-            HSMod HSSSM = new HSMod("HalfSwordSplitScreenMod", "https://github.com/massclown/HalfSwordSplitScreenMod", false);
+            HSMod HSSSM = new HSMod("HalfSwordSplitScreenMod", "https://github.com/massclown/HalfSwordSplitScreenMod", false, new List<HSInstallable>() { UE4SS });
             mods.Add(HSSSM);
             HSSSM.LogMe();
 
@@ -102,33 +102,38 @@ namespace HalfSwordModInstaller
                             if (mod.IsDownloaded)
                             {
                                 // TODO re-download or not? Just re-download for now.
-                                mod.Download();
+                                backgroundWorker1.RunWorkerAsync(new Action(mod.Download));                                
                             }
                             else
                             {
-                                mod.Download();
+                                backgroundWorker1.RunWorkerAsync(new Action(mod.Download));
                             }
                             break;
                         case "installButton":
                             if (mod.IsInstalled)
                             {
                                 // TODO re-install or not? For now, uninstall.
-                                mod.Uninstall();
+                                if (MessageBox.Show($"Really uninstall {mod.Name}?", "Confirm uninstallation",
+                                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                                    MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.Yes)
+                                {
+                                    backgroundWorker1.RunWorkerAsync(new Action(mod.Uninstall));
+                                }
                             }
                             else
                             {
                                 // Install handles downloading automatically, so just install anyway.
-                                mod.Install();
+                                backgroundWorker1.RunWorkerAsync(new Action(mod.Install));
                             }
                             break;
                         case "enableButton":
                             if (!mod.IsInstalled)
                             {
                                 // TODO Ask to install it first and abort.
-                                MessageBox.Show("Please install first");
+                                MessageBox.Show($"Please install {mod.Name} first!", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
                             else
-                            { 
+                            {
                                 if (mod.IsEnabled)
                                 {
                                     mod.SetEnabled(false);
@@ -145,6 +150,35 @@ namespace HalfSwordModInstaller
                 }
             }
             bindingSource1.ResetBindings(false);
+        }
+
+        private void dataGridView1_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for (var i = e.RowIndex; i <= e.RowIndex + e.RowCount - 1; i++)
+            {
+                var row = dataGridView1.Rows[i];
+                var item = row.DataBoundItem as HSInstallable;
+                if (item == null) continue;
+                for (var j = 0; j < dataGridView1.ColumnCount; j++)
+                {
+                    if (dataGridView1.Columns[j].DataPropertyName.StartsWith("Is"))
+                    {
+                        row.Cells[j].Style.BackColor = ((bool)row.Cells[j].Value) ? Color.LightGreen : Color.PaleVioletRed;
+                    }
+                }
+            }
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Action action = (Action)e.Argument;
+            action.Invoke();
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            // TODO close the popup????
+            // TODO refresh styles of datagridview ???
         }
     }
 }

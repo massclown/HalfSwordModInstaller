@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace HalfSwordModInstaller
 {
@@ -45,7 +46,7 @@ namespace HalfSwordModInstaller
                 else
                 {
                     _isInstalled = false;
-                }   
+                }
                 return _isInstalled;
             }
 
@@ -121,10 +122,10 @@ namespace HalfSwordModInstaller
             Broken          // Unusable, broken (downloaded and can't be installed, or installed and unusable)
         }
 
-        public HSMod(string name, string url, bool hasLogicMods) : base(name, url)
+        public HSMod(string name, string url, bool hasLogicMods, List<HSInstallable> dependencyGraph) : base(name, url, dependencyGraph)
         {
-            HasLogicMods = hasLogicMods;
-            RelativePath = $"Mods\\{Name}";
+            this.HasLogicMods = hasLogicMods;
+            this.RelativePath = $"Mods\\{Name}";
         }
 
         public new void LogMe()
@@ -136,17 +137,37 @@ namespace HalfSwordModInstaller
 
         public override void Install()
         {
+            if (this.dependencyGraph != null && this.dependencyGraph.Count > 0)
+            {
+                // TODO should we throw an exception here? Or should we simply install the dependency?
+                foreach (var dependency in this.dependencyGraph)
+                {
+                    if (!dependency.IsInstalled)
+                    {
+                        HSUtils.Log($"[ERROR] Cannot install mod \"{Name}\", dependencies are not met");
+                        return;
+                    }
+                }
+            }
             if (!IsDownloaded)
             {
                 Download();
             }
             string unzipFolder = Path.Combine(HSUtils.HSBinaryPath, "Mods");
+            if (!Directory.Exists(unzipFolder))
+            {
+                // TODO the installation is broken. Should probably bail out.
+                HSUtils.Log($"[ERROR] Cannot install mod \"{Name}\", missing \"Mods\" folder");
+                return;
+            }
             HSUtils.ForceExtractToDirectory(LocalZipPath, unzipFolder);
             // Clean up by removing readme and license, yes, this is bad. Sorry.
             string readmePath = Path.Combine(unzipFolder, "README.md");
-            File.Delete(readmePath);
+            if (File.Exists(readmePath)) { File.Delete(readmePath); }
+
             string licensePath = Path.Combine(unzipFolder, "LICENSE");
-            File.Delete(licensePath);
+            if (File.Exists(licensePath)) { File.Delete(licensePath); }
+
             // TODO this does not account for which exact files this mod has in LogicMods
             if (HasLogicMods)
             {
@@ -165,6 +186,8 @@ namespace HalfSwordModInstaller
 
         public override void Uninstall()
         {
+            // TODO not sure if we need to erase the mod line from mods.txt or not at this moment
+            // Only disable it for now, leave the line in mods.txt
             if (IsEnabled)
             {
                 SetEnabled(false);
@@ -205,6 +228,13 @@ namespace HalfSwordModInstaller
         public static void EditModsTxt(string modName, bool enabled)
         {
             string value = enabled ? "1" : "0";
+
+            if (!File.Exists(HSUtils.HSUE4SSModsTxt))
+            {
+                // TODO should probably abort hard here, installation is broken
+                HSUtils.Log($"[ERROR] Mods.txt is missing, cannot {(enabled ? "enable" : "disable")} mod {modName}");
+                return;
+            }
 
             var lines = File.ReadAllLines(HSUtils.HSUE4SSModsTxt).ToList();
             int keybindsIndex = lines.FindIndex(line => line.Contains("Keybinds"));

@@ -76,7 +76,7 @@ namespace HalfSwordModInstaller
                     }
                     catch (IOException ioExp)
                     {
-                        HSUtils.Log($"An error occurred while deleting the file [{fullFilePath}]: {ioExp.Message}");
+                        HSUtils.Log($"[ERROR] An error occurred while deleting the file [{fullFilePath}]: {ioExp.Message}");
                     }
                 }
             }
@@ -93,7 +93,7 @@ namespace HalfSwordModInstaller
                     }
                     catch (IOException ioExp)
                     {
-                        HSUtils.Log($"An error occurred while deleting the Folder [{fullDirPath}]: {ioExp.Message}");
+                        HSUtils.Log($"[ERROR] An error occurred while deleting the Folder [{fullDirPath}]: {ioExp.Message}");
                     }
                 }
             }
