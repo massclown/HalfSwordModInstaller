@@ -22,6 +22,11 @@ namespace HalfSwordModInstaller
                 );
         }
 
+        public override void Install(bool forceInstallDependencies = false)
+        {
+            Install();
+        }
+
         public override void Install()
         {
             if (!IsDownloaded)
@@ -51,6 +56,8 @@ namespace HalfSwordModInstaller
         {
             string[] filePaths =
             {
+                "README.md",
+                "Changelog.md",
                 "xinput1_3.dll",
                 "dwmapi.dll",
                 "UE4SS.dll",

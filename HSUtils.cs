@@ -17,6 +17,7 @@ namespace HalfSwordModInstaller
         public static string HSBinaryPath = Path.Combine(HSInstallPath, "HalfSwordUE5\\Binaries\\Win64");
         public static string HSLogicModsPath = Path.GetFullPath(Path.Combine(HSBinaryPath, "..\\..\\Content\\Paks\\LogicMods"));
         public static string HSUE4SSModsTxt = Path.Combine(HSBinaryPath, "Mods", "mods.txt");
+        public static string HSUE4SSlog = Path.Combine(HSBinaryPath, "UE4SS.log");
 
         public static string GetGameInstallPath(int appId)
         {

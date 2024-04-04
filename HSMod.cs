@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace HalfSwordModInstaller
 {
@@ -15,8 +16,19 @@ namespace HalfSwordModInstaller
             {
                 if (Directory.Exists(Path.Combine(HSUtils.HSBinaryPath, RelativePath)))
                 {
-                    if (File.Exists(Path.Combine(HSUtils.HSBinaryPath, RelativePath, "scripts\\main.lua")))
+                    var mainLua = Path.Combine(HSUtils.HSBinaryPath, RelativePath, "scripts\\main.lua");
+                    if (File.Exists(mainLua))
                     {
+                        // TODO this is bad
+                        var firstLine = File.ReadLines(mainLua).First();
+                        foreach (Match match in Regex.Matches(firstLine, @"\s(v\d+(\.\d+)+)"))
+                        {
+                            if (match.Success && match.Groups.Count > 0)
+                            {
+                                InstalledVersion = match.Groups[1].Value;
+                                break;
+                            }
+                        }
                         if (HasLogicMods)
                         {
                             if (Directory.Exists(HSUtils.HSLogicModsPath))
@@ -134,17 +146,28 @@ namespace HalfSwordModInstaller
                 $"Downloaded={IsDownloaded}, Installed={IsInstalled}, Enabled={IsEnabled}, " +
                 $"HasLogicMods={HasLogicMods}");
         }
-
         public override void Install()
         {
-            if (this.dependencyGraph != null && this.dependencyGraph.Count > 0)
+            Install(false);
+        }
+        public override void InstallAll()
+        {
+            Install(true);
+        }
+        public override void Install(bool forceInstallDependencies = false)
+        {
+            if (this.dependencyGraph?.Count > 0)
             {
                 // TODO should we throw an exception here? Or should we simply install the dependency?
                 foreach (var dependency in this.dependencyGraph)
                 {
-                    if (!dependency.IsInstalled)
+                    if (forceInstallDependencies)
                     {
-                        HSUtils.Log($"[ERROR] Cannot install mod \"{Name}\", dependencies are not met");
+                        dependency.Install(true);
+                    }
+                    else if (!dependency.IsInstalled)
+                    {
+                        HSUtils.Log($"[ERROR] Cannot install mod \"{Name}\", dependency \"{dependency.Name}\" is not installed.");
                         return;
                     }
                 }
@@ -176,7 +199,13 @@ namespace HalfSwordModInstaller
                 Directory.CreateDirectory(HSUtils.HSLogicModsPath);
                 foreach (var file in new DirectoryInfo(tempLogicMods).GetFiles())
                 {
-                    file.MoveTo(Path.Combine(HSUtils.HSLogicModsPath, file.Name));
+                    var newFname = Path.Combine(HSUtils.HSLogicModsPath, file.Name);
+                    if (File.Exists(newFname))
+                    {
+                        HSUtils.Log($"[WARNING] Overwriting file {newFname}");
+                        File.Delete(newFname); 
+                    }
+                    file.MoveTo(newFname);
                 }
                 Directory.Delete(tempLogicMods);
             }
