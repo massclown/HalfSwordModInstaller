@@ -70,6 +70,10 @@ namespace HalfSwordModInstaller
         }
         protected bool _isInstalled = false;
         public virtual bool IsInstalled { get; set; }
+
+        protected bool _isBroken = false;
+        public virtual bool IsBroken { get; set; }
+
         protected bool _isEnabled = false;
         public virtual bool IsEnabled { get; set; }
 

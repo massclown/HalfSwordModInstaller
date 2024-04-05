@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Policy;
 
 namespace HalfSwordModInstaller
 {
@@ -56,6 +57,7 @@ namespace HalfSwordModInstaller
         {
             string[] filePaths =
             {
+                "UE4SS.log",
                 "README.md",
                 "Changelog.md",
                 "xinput1_3.dll",
@@ -142,12 +144,37 @@ namespace HalfSwordModInstaller
                     _isInstalled = false;
                     InstalledVersion = null;
                 }
+
                 return _isInstalled;
             }
             set
             {
                 _isInstalled |= value;
             }
+        }
+
+        public override bool IsBroken 
+        { 
+            get
+            {
+                if (File.Exists(Path.Combine(HSUtils.HSBinaryPath, "xinput1_3.dll"))
+                    &&
+                    (
+                        File.Exists(Path.Combine(HSUtils.HSBinaryPath, "dwmapi.dll"))
+                        || File.Exists(Path.Combine(HSUtils.HSBinaryPath, "UE4SS.dll"))
+                    ))
+                {
+                    HSUtils.Log($"[ERROR] two version of UE4SS are installed at the same time!");
+                    InstalledVersion = null;
+                    // TODO UE4SS installation is broken, both 2.5.2 and 3.x.x are present
+                    // Must remove one of them somehow, and/or report that none are installed?
+                    _isBroken = true;
+                }
+
+                return _isBroken;
+            }
+            
+            set => _isBroken = value; 
         }
 
         public override bool IsEnabled

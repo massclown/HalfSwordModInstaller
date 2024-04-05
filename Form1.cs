@@ -226,6 +226,19 @@ namespace HalfSwordModInstaller
             try
             {
                 buttonEasyInstall.Text = "Working, please wait...";
+                var HSUE4SS = mods.SingleOrDefault(elem => elem.Name == "UE4SS");
+                if (HSUE4SS.IsBroken) 
+                {
+                    if (MessageBox.Show($"Broken UE4SS installation detected.\nRepair UE4SS?", "Confirm installation repair",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                        MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.No)
+                    {
+                        buttonEasyInstall.Text = oldText;
+                        return;
+                    }
+                    HSUE4SS.Uninstall();
+                }
+
                 var HSTM = mods.SingleOrDefault(elem => elem.Name == "HalfSwordTrainerMod");
                 if (HSTM.IsInstalled)
                 {
@@ -238,11 +251,15 @@ namespace HalfSwordModInstaller
                     }
 
                 }
+
                 HSTM.Download();
                 HSTM.InstallAll();
                 HSTM.SetEnabled(true);
+
                 buttonEasyInstall.Text = oldText;
                 StatusStipTextUpdate();
+                bindingSource1?.ResetBindings(false);
+                dataGridView1.Refresh();
                 MessageBox.Show($"Half Sword Trainer Mod successfully installed!", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exc)
