@@ -42,6 +42,12 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.buttonUE4SSLog = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.VersionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsDownloadedColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsInstalledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsEnabledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ModWebURL = new System.Windows.Forms.DataGridViewLinkColumn();
             this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
             this.buttonCopyUE4SSLog = new System.Windows.Forms.Button();
             this.buttonCopyInstallerLog = new System.Windows.Forms.Button();
@@ -49,12 +55,6 @@
             this.buttonUninstallAll = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.VersionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsDownloadedColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsInstalledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsEnabledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ModWebURL = new System.Windows.Forms.DataGridViewLinkColumn();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -93,6 +93,7 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1382, 731);
             this.tabControl1.TabIndex = 1;
+            this.tabControl1.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
             // 
             // tabPage2
             // 
@@ -154,7 +155,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1453, 694);
+            this.tabPage1.Size = new System.Drawing.Size(1374, 702);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Advanced";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -180,14 +181,14 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1447, 688);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1368, 696);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // buttonUE4SSLog
             // 
             this.buttonUE4SSLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.buttonUE4SSLog.AutoSize = true;
-            this.buttonUE4SSLog.Location = new System.Drawing.Point(529, 643);
+            this.buttonUE4SSLog.Location = new System.Drawing.Point(495, 651);
             this.buttonUE4SSLog.Name = "buttonUE4SSLog";
             this.buttonUE4SSLog.Size = new System.Drawing.Size(147, 42);
             this.buttonUE4SSLog.TabIndex = 2;
@@ -227,71 +228,11 @@
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(1441, 634);
+            this.dataGridView1.Size = new System.Drawing.Size(1362, 642);
             this.dataGridView1.TabIndex = 0;
             this.toolTip1.SetToolTip(this.dataGridView1, "List of all mods and their status");
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dataGridView1_RowsAdded);
-            // 
-            // buttonCopyUE4SSLog
-            // 
-            this.buttonCopyUE4SSLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonCopyUE4SSLog.AutoSize = true;
-            this.buttonCopyUE4SSLog.Location = new System.Drawing.Point(770, 643);
-            this.buttonCopyUE4SSLog.Name = "buttonCopyUE4SSLog";
-            this.buttonCopyUE4SSLog.Size = new System.Drawing.Size(147, 42);
-            this.buttonCopyUE4SSLog.TabIndex = 5;
-            this.buttonCopyUE4SSLog.Text = "Copy UE4SS log\r\nfilename to clipboard";
-            this.toolTip1.SetToolTip(this.buttonCopyUE4SSLog, "Copy the filename of the UE4SS log file to clipboard, so you can find it later");
-            this.buttonCopyUE4SSLog.UseVisualStyleBackColor = true;
-            this.buttonCopyUE4SSLog.Click += new System.EventHandler(this.buttonCopyUE4SSLog_Click);
-            // 
-            // buttonCopyInstallerLog
-            // 
-            this.buttonCopyInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonCopyInstallerLog.AutoSize = true;
-            this.buttonCopyInstallerLog.Location = new System.Drawing.Point(288, 643);
-            this.buttonCopyInstallerLog.Name = "buttonCopyInstallerLog";
-            this.buttonCopyInstallerLog.Size = new System.Drawing.Size(147, 42);
-            this.buttonCopyInstallerLog.TabIndex = 4;
-            this.buttonCopyInstallerLog.Text = "Copy installer log\r\nfilename to clipboard";
-            this.toolTip1.SetToolTip(this.buttonCopyInstallerLog, "Copy the filename of the installer log file to clipboard, so you can find it late" +
-        "r");
-            this.buttonCopyInstallerLog.UseVisualStyleBackColor = true;
-            this.buttonCopyInstallerLog.Click += new System.EventHandler(this.buttonCopyInstallerLog_Click);
-            // 
-            // buttonInstallerLog
-            // 
-            this.buttonInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonInstallerLog.AutoSize = true;
-            this.buttonInstallerLog.Location = new System.Drawing.Point(47, 643);
-            this.buttonInstallerLog.Name = "buttonInstallerLog";
-            this.buttonInstallerLog.Size = new System.Drawing.Size(147, 42);
-            this.buttonInstallerLog.TabIndex = 1;
-            this.buttonInstallerLog.Text = "Open installer log";
-            this.toolTip1.SetToolTip(this.buttonInstallerLog, "Open the log file of this installer");
-            this.buttonInstallerLog.UseVisualStyleBackColor = true;
-            this.buttonInstallerLog.Click += new System.EventHandler(this.buttonInstallerLog_Click);
-            // 
-            // buttonUninstallAll
-            // 
-            this.buttonUninstallAll.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonUninstallAll.AutoSize = true;
-            this.buttonUninstallAll.BackColor = System.Drawing.Color.Transparent;
-            this.buttonUninstallAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonUninstallAll.Location = new System.Drawing.Point(1252, 643);
-            this.buttonUninstallAll.Name = "buttonUninstallAll";
-            this.buttonUninstallAll.Size = new System.Drawing.Size(147, 42);
-            this.buttonUninstallAll.TabIndex = 3;
-            this.buttonUninstallAll.Text = "Uninstall all mods";
-            this.toolTip1.SetToolTip(this.buttonUninstallAll, "Uninstall all mods, including UE4SS");
-            this.buttonUninstallAll.UseVisualStyleBackColor = false;
-            this.buttonUninstallAll.Click += new System.EventHandler(this.buttonUninstallAll_Click);
-            // 
-            // backgroundWorker1
-            // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
             // NameColumn
             // 
@@ -353,6 +294,66 @@
             this.ModWebURL.TrackVisitedState = false;
             this.ModWebURL.Width = 43;
             // 
+            // buttonCopyUE4SSLog
+            // 
+            this.buttonCopyUE4SSLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonCopyUE4SSLog.AutoSize = true;
+            this.buttonCopyUE4SSLog.Location = new System.Drawing.Point(723, 651);
+            this.buttonCopyUE4SSLog.Name = "buttonCopyUE4SSLog";
+            this.buttonCopyUE4SSLog.Size = new System.Drawing.Size(147, 42);
+            this.buttonCopyUE4SSLog.TabIndex = 5;
+            this.buttonCopyUE4SSLog.Text = "Copy UE4SS log\r\nfilename to clipboard";
+            this.toolTip1.SetToolTip(this.buttonCopyUE4SSLog, "Copy the filename of the UE4SS log file to clipboard, so you can find it later");
+            this.buttonCopyUE4SSLog.UseVisualStyleBackColor = true;
+            this.buttonCopyUE4SSLog.Click += new System.EventHandler(this.buttonCopyUE4SSLog_Click);
+            // 
+            // buttonCopyInstallerLog
+            // 
+            this.buttonCopyInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonCopyInstallerLog.AutoSize = true;
+            this.buttonCopyInstallerLog.Location = new System.Drawing.Point(268, 651);
+            this.buttonCopyInstallerLog.Name = "buttonCopyInstallerLog";
+            this.buttonCopyInstallerLog.Size = new System.Drawing.Size(147, 42);
+            this.buttonCopyInstallerLog.TabIndex = 4;
+            this.buttonCopyInstallerLog.Text = "Copy installer log\r\nfilename to clipboard";
+            this.toolTip1.SetToolTip(this.buttonCopyInstallerLog, "Copy the filename of the installer log file to clipboard, so you can find it late" +
+        "r");
+            this.buttonCopyInstallerLog.UseVisualStyleBackColor = true;
+            this.buttonCopyInstallerLog.Click += new System.EventHandler(this.buttonCopyInstallerLog_Click);
+            // 
+            // buttonInstallerLog
+            // 
+            this.buttonInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonInstallerLog.AutoSize = true;
+            this.buttonInstallerLog.Location = new System.Drawing.Point(40, 651);
+            this.buttonInstallerLog.Name = "buttonInstallerLog";
+            this.buttonInstallerLog.Size = new System.Drawing.Size(147, 42);
+            this.buttonInstallerLog.TabIndex = 1;
+            this.buttonInstallerLog.Text = "Open installer log";
+            this.toolTip1.SetToolTip(this.buttonInstallerLog, "Open the log file of this installer");
+            this.buttonInstallerLog.UseVisualStyleBackColor = true;
+            this.buttonInstallerLog.Click += new System.EventHandler(this.buttonInstallerLog_Click);
+            // 
+            // buttonUninstallAll
+            // 
+            this.buttonUninstallAll.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonUninstallAll.AutoSize = true;
+            this.buttonUninstallAll.BackColor = System.Drawing.Color.Transparent;
+            this.buttonUninstallAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonUninstallAll.Location = new System.Drawing.Point(1179, 651);
+            this.buttonUninstallAll.Name = "buttonUninstallAll";
+            this.buttonUninstallAll.Size = new System.Drawing.Size(147, 42);
+            this.buttonUninstallAll.TabIndex = 3;
+            this.buttonUninstallAll.Text = "Uninstall all mods";
+            this.toolTip1.SetToolTip(this.buttonUninstallAll, "Uninstall all mods, including UE4SS");
+            this.buttonUninstallAll.UseVisualStyleBackColor = false;
+            this.buttonUninstallAll.Click += new System.EventHandler(this.buttonUninstallAll_Click);
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -363,7 +364,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(1024, 600);
             this.Name = "Form1";
-            this.Text = "Half Sword Mod Installer by massclown";
+            this.Text = "Half Sword Mod Installer";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();

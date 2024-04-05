@@ -25,15 +25,23 @@ namespace HalfSwordModInstaller
 
         public override void Install(bool forceInstallDependencies = false)
         {
+            // We ignore dependencies as UE4SS is the first and has no dependencies
             Install();
         }
 
         public override void Install()
         {
+            // TODO this is bad, we should probably fix it in another way
+            if (IsInstalled)
+            {
+                Uninstall();
+            }
+
             if (!IsDownloaded)
             {
                 Download();
             }
+
             string unzipFolder = HSUtils.HSBinaryPath;
             HSUtils.ForceExtractToDirectory(LocalZipPath, unzipFolder);
 
@@ -47,8 +55,12 @@ namespace HalfSwordModInstaller
                 lines[keyIndex] = "GraphicsAPI = d3d11";
                 File.WriteAllLines(UE4SSSettingsIni, lines);
             }
+            // We probably need to refresh the detected values of IsInstalled, IsEnabled and also use the actual version somehow
+            // TODO this is horrible, we are forcing the order of functions so that the version is detected before enabled status, etc.
+            var temp1 = IsInstalled;
+            var temp2 = IsEnabled;
 
-            HSUtils.Log($"Installed UE4SS from \"{LocalZipPath}\" to \"{unzipFolder}\"");
+            HSUtils.Log($"Installed UE4SS from \"{LocalZipPath}\" to \"{unzipFolder}\" {(temp1 && temp2 ? "successfully" : "with errors")}");
         }
 
         // We actually delete only the files that may affect the game's execution
@@ -102,7 +114,7 @@ namespace HalfSwordModInstaller
                     }
                     catch (IOException ioExp)
                     {
-                        HSUtils.Log($"[ERROR] An error occurred while deleting the Folder [{fullDirPath}]: {ioExp.Message}");
+                        HSUtils.Log($"[ERROR] An error occurred while deleting the folder [{fullDirPath}]: {ioExp.Message}");
                     }
                 }
             }
@@ -164,7 +176,7 @@ namespace HalfSwordModInstaller
                         || File.Exists(Path.Combine(HSUtils.HSBinaryPath, "UE4SS.dll"))
                     ))
                 {
-                    HSUtils.Log($"[ERROR] two version of UE4SS are installed at the same time!");
+                    HSUtils.Log($"[ERROR] two versions of UE4SS are installed at the same time!");
                     InstalledVersion = null;
                     // TODO UE4SS installation is broken, both 2.5.2 and 3.x.x are present
                     // Must remove one of them somehow, and/or report that none are installed?

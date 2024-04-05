@@ -30,6 +30,7 @@ namespace HalfSwordModInstaller
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // TODO this is bad, we don't have a better path to extract the Steam and Half Sword installation state
             try
             {
                 string HSPath = HSUtils.HSBinaryPath;
@@ -40,7 +41,9 @@ namespace HalfSwordModInstaller
                 MessageBox.Show("Could not find Steam or Half Sword Demo, exiting.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
             }
-            // toolStripStatusLabel.Text = $"Half Sword demo found in {HSPath}";
+
+            // TODO have the list of mods downloaded from somewhere. Hardcoding it for now
+            // TODO define the dependencies by name instead of by actual HSInstallable object
 
             mods = new BindingList<HSInstallable>();
             HSUE4SS UE4SS = new HSUE4SS();
@@ -96,7 +99,7 @@ namespace HalfSwordModInstaller
             };
             this.dataGridView1.Columns.Insert(6, enableButtonColumn);
 
-            //bindingSource1.ResetBindings(false);
+            //bindingSource1?.ResetBindings(false);
             //dataGridView1.Refresh();
             StatusStipTextUpdate();
         }
@@ -184,7 +187,8 @@ namespace HalfSwordModInstaller
                     }
                 }
             }
-            bindingSource1.ResetBindings(false);
+            bindingSource1?.ResetBindings(false);
+            dataGridView1.Refresh();
             StatusStipTextUpdate();
         }
 
@@ -214,9 +218,8 @@ namespace HalfSwordModInstaller
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            // TODO close the popup????
-            // TODO refresh styles of datagridview ???
             bindingSource1?.ResetBindings(false);
+            dataGridView1.Refresh();
             Cursor.Current = Cursors.Default;
         }
 
@@ -237,6 +240,8 @@ namespace HalfSwordModInstaller
                         return;
                     }
                     HSUE4SS.Uninstall();
+                    HSUE4SS.IsBroken = false;
+                    // We don't reinstall UE4SS here as the mod logic will install it anyway later
                 }
 
                 var HSTM = mods.SingleOrDefault(elem => elem.Name == "HalfSwordTrainerMod");
@@ -251,6 +256,7 @@ namespace HalfSwordModInstaller
                     }
 
                 }
+                Cursor.Current = Cursors.WaitCursor;
 
                 HSTM.Download();
                 HSTM.InstallAll();
@@ -260,6 +266,8 @@ namespace HalfSwordModInstaller
                 StatusStipTextUpdate();
                 bindingSource1?.ResetBindings(false);
                 dataGridView1.Refresh();
+                Cursor.Current = Cursors.Default;
+
                 MessageBox.Show($"Half Sword Trainer Mod successfully installed!", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception exc)
@@ -352,5 +360,28 @@ namespace HalfSwordModInstaller
             }
         }
 
+        public void ConfirmAndRepair()
+        {
+            var HSUE4SS = mods.SingleOrDefault(elem => elem.Name == "UE4SS");
+            if (HSUE4SS.IsBroken)
+            {
+                if (MessageBox.Show($"Broken UE4SS installation detected.\nRepair UE4SS?", "Confirm installation repair",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.No)
+                {
+                    return;
+                }
+                HSUE4SS.Uninstall();
+                HSUE4SS.Download();
+                HSUE4SS.Install();
+                HSUE4SS.IsBroken = false;
+                StatusStipTextUpdate();
+            }
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            ConfirmAndRepair();
+        }
     }
 }
