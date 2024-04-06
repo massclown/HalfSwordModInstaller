@@ -6,10 +6,10 @@ USE AT YOUR OWN RISK.
 
 # How to use it
 
-## Download the fresh installer here at https://github.com/massclown/HalfSwordModInstaller/releases/latest/download
+## Download the fresh installer here at https://github.com/massclown/HalfSwordModInstaller/releases/latest/download/HalfSwordModInstaller.exe
 
 ## Simple mode
-When the game is not running, start the installer, and press the big button and wait. Don't press the chair.
+When the game is not running, start the installer, and press the big button and wait. Don't press the stool.
 
 ![Alt text](images/ui_basic.png?raw=true "Screenshot of installer in simple mode")
 
