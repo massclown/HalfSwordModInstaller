@@ -1,15 +1,15 @@
 name: build-release
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    tags:
+      - "v*"
 
 jobs:
   build:
     runs-on: windows-2019
     env:
       Solution_Name: HalfSwordModInstaller.sln
+      Release_Binary: HalfSwordModInstaller\bin\Release\HalfSwordModInstaller.exe
     steps:
     - uses: actions/checkout@v4
     
@@ -24,3 +24,28 @@ jobs:
     
     - name: Build solution
       run: msbuild $env:Solution_Name -t:rebuild -property:Configuration=Release
+
+    - name: Upload release build
+      uses: actions/upload-artifact@v4
+      with:
+        name: HalfSwordModInstaller.exe
+        path: $env:Release_Binary
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}        
+
+    - name: Upload Release Asset
+      id: upload-release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: $env:Release_Binary
+        asset_name: HalfSwordModInstaller.exe
