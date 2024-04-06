@@ -64,7 +64,7 @@ namespace HalfSwordModInstaller
 
             set
             {
-                _isInstalled |= value;
+                _isInstalled = value;
             }
         }
         public override bool IsEnabled
@@ -101,7 +101,7 @@ namespace HalfSwordModInstaller
 
             set
             {
-                _isEnabled |= value;
+                _isEnabled = value;
             }
         }
         protected bool HasLogicMods = false;

@@ -150,6 +150,7 @@ namespace HalfSwordModInstaller
                     _isInstalled = true;
                     // TODO dangerous, should probably detect a real version somehow
                     InstalledVersion = "v3.x.x";
+                    Version= InstalledVersion;
                 }
                 else
                 {
@@ -185,8 +186,11 @@ namespace HalfSwordModInstaller
 
                 return _isBroken;
             }
-            
-            set => _isBroken = value; 
+
+            set
+            {
+                _isBroken = value;
+            }
         }
 
         public override bool IsEnabled
@@ -224,7 +228,7 @@ namespace HalfSwordModInstaller
             }
             set
             {
-                _isEnabled |= value;
+                _isEnabled = value;
             }
         }
 
