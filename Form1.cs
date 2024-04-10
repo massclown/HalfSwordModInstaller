@@ -30,16 +30,18 @@ namespace HalfSwordModInstaller
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // TODO this is bad, we don't have a better path to extract the Steam and Half Sword installation state
-            try
-            {
-                string HSPath = HSUtils.HSBinaryPath;
-                HSUtils.Log($"Steam install path found for Half Sword: \"{HSPath}\"");
-            }
-            catch (Exception ex)
+            // TODO this is bad, but we don't have a better path to extract the Steam and Half Sword installation state
+            string HSPath = HSUtils.HSBinaryPath;
+            if (HSPath == null)
             {
                 MessageBox.Show("Could not find Steam or Half Sword Demo, exiting.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.Close();
+                // Not really useful, but still
+                return;
+            }
+            else
+            {
+                HSUtils.Log($"Steam install path found for Half Sword: \"{HSPath}\"");
             }
 
             // TODO have the list of mods downloaded from somewhere. Hardcoding it for now

@@ -10,30 +10,46 @@ using System.Threading.Tasks;
 
 namespace HalfSwordModInstaller
 {
-    internal class HSUtils
+    internal static class HSUtils
     {
         public const int HSSteamAppID = 2642680;
-        public static string HSInstallPath = GetGameInstallPath(HSSteamAppID);
-        public static string HSBinaryPath = Path.Combine(HSInstallPath, "HalfSwordUE5\\Binaries\\Win64");
-        public static string HSLogicModsPath = Path.GetFullPath(Path.Combine(HSBinaryPath, "..\\..\\Content\\Paks\\LogicMods"));
-        public static string HSUE4SSModsTxt = Path.Combine(HSBinaryPath, "Mods", "mods.txt");
-        public static string HSUE4SSlog = Path.Combine(HSBinaryPath, "UE4SS.log");
+        // These strings are installation-dependent and may be broken
+        public static string HSInstallPath = null;
+        public static string HSBinaryPath = null;
+        public static string HSLogicModsPath = null;
+        public static string HSUE4SSModsTxt = null;
+        public static string HSUE4SSlog = null;
+
+        // These strings should exist always
+        public static string HSModInstallerDirPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "HalfSwordModInstaller");
+
+        public static string HSModInstallerLogFilePath = Path.Combine(
+                    HSModInstallerDirPath,
+                    "installer.log");
 
         public static string GetGameInstallPath(int appId)
         {
             // Find the Steam install directory from the registry
-            string steamPath = (string)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null);
-            if (steamPath == null)
+            string steamPathHKCU = (string)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null);
+            string steamPathHKLM = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam", "InstallPath", null);
+
+            if (steamPathHKCU == null && steamPathHKLM == null)
             {
-                throw new InvalidOperationException("Steam is not installed on this machine.");
+                throw new InvalidOperationException("[ERROR] Steam is not installed on this machine. No valid registry paths found.");
             }
 
-            // Replace slashes to match the system's format
-            steamPath = steamPath.Replace("/", "\\");
+            // Replace slashes to match the system's format for HKCU path that has format c:/program files (x86)/steam
+            // Or, if that one was not found, use HKLM path instead
+            string firstSteamPathFound = (steamPathHKCU != null) ? steamPathHKCU.Replace("/", "\\") : steamPathHKLM;
 
             // Path to the libraryfolders.vdf which contains paths to all Steam libraries
-            string libraryFoldersPath = Path.Combine(steamPath, "steamapps", "libraryfolders.vdf");
-
+            string libraryFoldersPath = Path.Combine(firstSteamPathFound, "steamapps", "libraryfolders.vdf");
+            if (!File.Exists(libraryFoldersPath))
+            {
+                throw new InvalidOperationException($"[ERROR] Steam installation broken, cannot find \"libraryfolders.vdf\" at \"{libraryFoldersPath}\"");
+            }
             string libraryFoldersContent = File.ReadAllText(libraryFoldersPath);
 
             // Use regex to find all library paths
@@ -60,15 +76,23 @@ namespace HalfSwordModInstaller
                 }
             }
 
+            // If we didn't find anything in *.ACF files, try also checking the registry "Installed" DWORD key in
+            // Computer\HKEY_CURRENT_USER\Software\Valve\Steam\Apps\2642680 
+            // Computer\HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam\Apps\2642680
+            int installedHKCU = (int)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam\Apps\" + appId.ToString(), "Installed", 0);
+            int installedHKLM = (int)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam\Apps\" + appId.ToString(), "Installed", 0);
+
+            if (installedHKCU == 1)
+            {
+                HSUtils.Log($"[WARNING] Valid Steam game entry present in registry [HKCU], but no valid appmanifest on disk was found.");
+            }
+            if (installedHKLM == 1)
+            {
+                HSUtils.Log($"[WARNING] Valid Steam game entry present in registry [HKLM], but no valid appmanifest on disk was found.");
+            }
+
             throw new InvalidOperationException($"[ERROR] Steam game with App ID {appId} is not installed or not found.");
         }
-        public static string HSModInstallerDirPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "HalfSwordModInstaller");
-
-        public static string HSModInstallerLogFilePath = Path.Combine(
-                    HSModInstallerDirPath,
-                    "installer.log");
 
         public static void Log(string message)
         {
@@ -99,12 +123,28 @@ namespace HalfSwordModInstaller
             }
         }
 
-        public HSUtils()
+        static HSUtils()
         {
             if (!Directory.Exists(HSModInstallerDirPath))
             {
                 Directory.CreateDirectory(HSModInstallerDirPath);
             }
+
+            try
+            {
+                HSInstallPath = GetGameInstallPath(HSSteamAppID);
+            }
+            catch (Exception ex) {
+                HSUtils.Log($"[ERROR] Exception while finding Half Sword Demo:\n{ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+                HSInstallPath = null;
+                return;
+            }
+
+            HSBinaryPath = Path.Combine(HSInstallPath, "HalfSwordUE5\\Binaries\\Win64");
+            HSLogicModsPath = Path.GetFullPath(Path.Combine(HSBinaryPath, "..\\..\\Content\\Paks\\LogicMods"));
+            HSUE4SSModsTxt = Path.Combine(HSBinaryPath, "Mods", "mods.txt");
+            HSUE4SSlog = Path.Combine(HSBinaryPath, "UE4SS.log");
         }
 
     }
