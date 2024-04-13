@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,13 @@ namespace HalfSwordModInstaller
         public Form1()
         {
             InitializeComponent();
+            // We set the assembly title and version during build in msbuild's "BeforeBuild" target inside *.csproj to a msbuild command-line property
+            // (see https://stackoverflow.com/a/58631756 for reference)
+            // These variables are set to sane defaults in the begining of *.csproj to ensure MSVS can build the project from the GUI
+            // and later overriden in our github actions to contain github tag (we build on a new tag == release)
+            // so for a tag "v0.2" we can have "Half Sword Mod Installer v0.2" as the titles and version "0.2.0.0" (dotnet versioning must be x.x.x.x)            
+            var assemblyTitle = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyTitleAttribute>().Take(1).FirstOrDefault().Title;
+            this.Text = assemblyTitle;
         }
 
         private void EasyUninstall()
@@ -232,7 +240,7 @@ namespace HalfSwordModInstaller
             {
                 buttonEasyInstall.Text = "Working, please wait...";
                 var HSUE4SS = mods.SingleOrDefault(elem => elem.Name == "UE4SS");
-                if (HSUE4SS.IsBroken) 
+                if (HSUE4SS.IsBroken)
                 {
                     if (MessageBox.Show($"Broken UE4SS installation detected.\nRepair UE4SS?", "Confirm installation repair",
                         MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
@@ -349,11 +357,11 @@ namespace HalfSwordModInstaller
         public void StatusStipTextUpdate()
         {
             this.toolStripStatusLabel.Text = "";
-            foreach (var mod in this.mods) 
+            foreach (var mod in this.mods)
             {
                 if (mod.IsInstalled)
                 {
-                    this.toolStripStatusLabel.Text += $"{mod.Name} version {mod.InstalledVersion} installed and {(mod.IsEnabled?"":"not ")}enabled. ";                 
+                    this.toolStripStatusLabel.Text += $"{mod.Name} version {mod.InstalledVersion} installed and {(mod.IsEnabled ? "" : "not ")}enabled. ";
                 }
             }
             if (this.toolStripStatusLabel.Text.Length == 0)

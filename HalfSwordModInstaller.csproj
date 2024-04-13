@@ -29,6 +29,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <AssemblyTitle Condition="'$(GitTag)' == ''">Half Sword Mod Installer</AssemblyTitle>
+    <Version Condition="'$(Version)' == ''">0.0.0.1</Version>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -142,4 +144,21 @@
     <Content Include="IconStool.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="BeforeBuild">
+    <ItemGroup>
+      <AssemblyAttributes Include="AssemblyTitle">
+        <_Parameter1>Half Sword Mod Installer $(GitTag)</_Parameter1>
+      </AssemblyAttributes>
+     <AssemblyAttributes Include="AssemblyVersion">
+        <_Parameter1>$(Version)</_Parameter1>
+     </AssemblyAttributes>
+    </ItemGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <WriteCodeFragment Language="C#"
+                      OutputFile="$(IntermediateOutputPath)GitTagVersion.cs"
+                      AssemblyAttributes="@(AssemblyAttributes)" />
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)GitTagVersion.cs" />
+    </ItemGroup>
+  </Target>
 </Project>

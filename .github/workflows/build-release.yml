@@ -2,7 +2,7 @@ name: build-release
 on:
   push:
     tags:
-      - "v*"
+      - "v[0-9]+.[0-9]+"
   workflow_dispatch:
 
 permissions:
@@ -19,15 +19,20 @@ jobs:
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
-    
+
     #- name: Setup NuGet
     #  uses: NuGet/setup-nuget@v1.2.0
           
     #- name: Restore Packages
     #  run: nuget restore $env:Solution_Name
     
+    # We need short and long versions from the name of the git tag, e.g. when GITHUB_REF=refs/tags/v0.2 then GITHUB_REF_NAME is v0.2. 
+    # We take v0.2 and 0.2. 
+    # The git tag must be in the format of v0.0 with two integers, because we will add two more to form a dotnet required assembly version format
+    # Yes, this is all horrible, but github workflow action expressions are missing a substring function, see https://github.com/orgs/community/discussions/26625
+    # Also, the shell here is powershell, so bash string substitutions aren't going to work, we need to use powershell ones.
     - name: Build solution
-      run: msbuild $env:Solution_Name -t:rebuild -property:Configuration=Release
+      run: msbuild $env:Solution_Name -t:rebuild -property:Configuration=Release -property:Version="$($env:GITHUB_REF_NAME -replace 'v','').0.0" -property:GitTag=$env:GITHUB_REF_NAME
 
     - name: Upload release build
       uses: actions/upload-artifact@v4
