@@ -42,12 +42,6 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.buttonUE4SSLog = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.VersionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsDownloadedColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsInstalledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsEnabledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ModWebURL = new System.Windows.Forms.DataGridViewLinkColumn();
             this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
             this.buttonCopyUE4SSLog = new System.Windows.Forms.Button();
             this.buttonCopyInstallerLog = new System.Windows.Forms.Button();
@@ -55,6 +49,13 @@
             this.buttonUninstallAll = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.VersionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.InstalledVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsDownloadedColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsInstalledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsEnabledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ModWebURL = new System.Windows.Forms.DataGridViewLinkColumn();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -148,6 +149,7 @@
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             this.toolTip1.SetToolTip(this.pictureBox1, "The icon is \"Stool\" by artworkbean from the Noun Project (CC BY 3.0)");
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // tabPage1
             // 
@@ -214,6 +216,7 @@
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.NameColumn,
             this.VersionColumn,
+            this.InstalledVersion,
             this.IsDownloadedColumn,
             this.IsInstalledColumn,
             this.IsEnabledColumn,
@@ -233,66 +236,6 @@
             this.toolTip1.SetToolTip(this.dataGridView1, "List of all mods and their status");
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dataGridView1_RowsAdded);
-            // 
-            // NameColumn
-            // 
-            this.NameColumn.DataPropertyName = "Name";
-            this.NameColumn.HeaderText = "Mod Name";
-            this.NameColumn.MinimumWidth = 6;
-            this.NameColumn.Name = "NameColumn";
-            this.NameColumn.ReadOnly = true;
-            this.NameColumn.Width = 200;
-            // 
-            // VersionColumn
-            // 
-            this.VersionColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.VersionColumn.DataPropertyName = "Version";
-            this.VersionColumn.HeaderText = "Version";
-            this.VersionColumn.MinimumWidth = 6;
-            this.VersionColumn.Name = "VersionColumn";
-            this.VersionColumn.ReadOnly = true;
-            this.VersionColumn.Width = 75;
-            // 
-            // IsDownloadedColumn
-            // 
-            this.IsDownloadedColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.IsDownloadedColumn.DataPropertyName = "IsDownloaded";
-            this.IsDownloadedColumn.HeaderText = "Downloaded?";
-            this.IsDownloadedColumn.MinimumWidth = 6;
-            this.IsDownloadedColumn.Name = "IsDownloadedColumn";
-            this.IsDownloadedColumn.ReadOnly = true;
-            this.IsDownloadedColumn.Width = 110;
-            // 
-            // IsInstalledColumn
-            // 
-            this.IsInstalledColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.IsInstalledColumn.DataPropertyName = "IsInstalled";
-            this.IsInstalledColumn.HeaderText = "Installed?";
-            this.IsInstalledColumn.MinimumWidth = 6;
-            this.IsInstalledColumn.Name = "IsInstalledColumn";
-            this.IsInstalledColumn.ReadOnly = true;
-            this.IsInstalledColumn.Width = 90;
-            // 
-            // IsEnabledColumn
-            // 
-            this.IsEnabledColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.IsEnabledColumn.DataPropertyName = "IsEnabled";
-            this.IsEnabledColumn.HeaderText = "Enabled?";
-            this.IsEnabledColumn.MinimumWidth = 6;
-            this.IsEnabledColumn.Name = "IsEnabledColumn";
-            this.IsEnabledColumn.ReadOnly = true;
-            this.IsEnabledColumn.Width = 90;
-            // 
-            // ModWebURL
-            // 
-            this.ModWebURL.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.ModWebURL.DataPropertyName = "Url";
-            this.ModWebURL.HeaderText = "URL";
-            this.ModWebURL.MinimumWidth = 6;
-            this.ModWebURL.Name = "ModWebURL";
-            this.ModWebURL.ReadOnly = true;
-            this.ModWebURL.TrackVisitedState = false;
-            this.ModWebURL.Width = 43;
             // 
             // buttonCopyUE4SSLog
             // 
@@ -354,6 +297,77 @@
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
+            // NameColumn
+            // 
+            this.NameColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.NameColumn.DataPropertyName = "Name";
+            this.NameColumn.HeaderText = "Mod Name";
+            this.NameColumn.MinimumWidth = 6;
+            this.NameColumn.Name = "NameColumn";
+            this.NameColumn.ReadOnly = true;
+            this.NameColumn.Width = 200;
+            // 
+            // VersionColumn
+            // 
+            this.VersionColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.VersionColumn.DataPropertyName = "LatestVersion";
+            this.VersionColumn.HeaderText = "Latest";
+            this.VersionColumn.MinimumWidth = 6;
+            this.VersionColumn.Name = "VersionColumn";
+            this.VersionColumn.ReadOnly = true;
+            this.VersionColumn.Width = 70;
+            // 
+            // InstalledVersion
+            // 
+            this.InstalledVersion.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.InstalledVersion.DataPropertyName = "InstalledVersion";
+            this.InstalledVersion.HeaderText = "Installed";
+            this.InstalledVersion.MinimumWidth = 6;
+            this.InstalledVersion.Name = "InstalledVersion";
+            this.InstalledVersion.ReadOnly = true;
+            this.InstalledVersion.Width = 70;
+            // 
+            // IsDownloadedColumn
+            // 
+            this.IsDownloadedColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;
+            this.IsDownloadedColumn.DataPropertyName = "IsDownloaded";
+            this.IsDownloadedColumn.HeaderText = "Downloaded?";
+            this.IsDownloadedColumn.MinimumWidth = 95;
+            this.IsDownloadedColumn.Name = "IsDownloadedColumn";
+            this.IsDownloadedColumn.ReadOnly = true;
+            this.IsDownloadedColumn.Width = 95;
+            // 
+            // IsInstalledColumn
+            // 
+            this.IsInstalledColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;
+            this.IsInstalledColumn.DataPropertyName = "IsInstalled";
+            this.IsInstalledColumn.HeaderText = "Installed?";
+            this.IsInstalledColumn.MinimumWidth = 75;
+            this.IsInstalledColumn.Name = "IsInstalledColumn";
+            this.IsInstalledColumn.ReadOnly = true;
+            this.IsInstalledColumn.Width = 75;
+            // 
+            // IsEnabledColumn
+            // 
+            this.IsEnabledColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCellsExceptHeader;
+            this.IsEnabledColumn.DataPropertyName = "IsEnabled";
+            this.IsEnabledColumn.HeaderText = "Enabled?";
+            this.IsEnabledColumn.MinimumWidth = 75;
+            this.IsEnabledColumn.Name = "IsEnabledColumn";
+            this.IsEnabledColumn.ReadOnly = true;
+            this.IsEnabledColumn.Width = 75;
+            // 
+            // ModWebURL
+            // 
+            this.ModWebURL.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.ModWebURL.DataPropertyName = "Url";
+            this.ModWebURL.HeaderText = "URL";
+            this.ModWebURL.MinimumWidth = 6;
+            this.ModWebURL.Name = "ModWebURL";
+            this.ModWebURL.ReadOnly = true;
+            this.ModWebURL.TrackVisitedState = false;
+            this.ModWebURL.Width = 43;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -404,6 +418,7 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.DataGridViewTextBoxColumn NameColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn VersionColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn InstalledVersion;
         private System.Windows.Forms.DataGridViewTextBoxColumn IsDownloadedColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn IsInstalledColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn IsEnabledColumn;

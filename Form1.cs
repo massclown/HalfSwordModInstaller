@@ -25,14 +25,15 @@ namespace HalfSwordModInstaller
             // (see https://stackoverflow.com/a/58631756 for reference)
             // These variables are set to sane defaults in the begining of *.csproj to ensure MSVS can build the project from the GUI
             // and later overriden in our github actions to contain github tag (we build on a new tag == release)
-            // so for a tag "v0.2" we can have "Half Sword Mod Installer v0.2" as the titles and version "0.2.0.0" (dotnet versioning must be x.x.x.x)            
+            // so for a tag "v0.2" we can have "Half Sword Mod Installer v0.2" as the titles and version "0.2.0.0" (dotnet versioning must be x.x.x.x)
             var assemblyTitle = System.Reflection.Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyTitleAttribute>().Take(1).FirstOrDefault().Title;
             this.Text = assemblyTitle;
         }
 
+        // This uninstalls everything, starting from UE4SS
         private void EasyUninstall()
         {
-            var UE4SS = mods.SingleOrDefault(elem => elem.Name == "UE4SS");
+            var UE4SS = (HSUE4SS) mods.SingleOrDefault(elem => elem.Name == "UE4SS");
             UE4SS.Uninstall();
         }
 
@@ -70,44 +71,49 @@ namespace HalfSwordModInstaller
 
             bindingSource1.DataSource = mods;
 
+            var firstButtonColumnIndex = 3;
+
             var downloadButtonColumn = new DataGridViewButtonColumn()
             {
                 Name = "downloadButton",
                 HeaderText = "Download?",
                 UseColumnTextForButtonValue = false,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells,
                 DefaultCellStyle = new DataGridViewCellStyle()
                 {
                     NullValue = "Download"
                 },
                 ToolTipText = "Download the latest version of this mod"
             };
-            this.dataGridView1.Columns.Insert(2, downloadButtonColumn);
+            this.dataGridView1.Columns.Insert(firstButtonColumnIndex, downloadButtonColumn);
 
             var installButtonColumn = new DataGridViewButtonColumn()
             {
                 Name = "installButton",
                 HeaderText = "Install?",
                 UseColumnTextForButtonValue = false,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells,
                 DefaultCellStyle = new DataGridViewCellStyle()
                 {
                     NullValue = "Install/Uninstall"
                 },
                 ToolTipText = "Install or uninstall this mod"
             };
-            this.dataGridView1.Columns.Insert(4, installButtonColumn);
+            this.dataGridView1.Columns.Insert(firstButtonColumnIndex + 2, installButtonColumn);
 
             var enableButtonColumn = new DataGridViewButtonColumn()
             {
                 Name = "enableButton",
                 HeaderText = "Enable?",
                 UseColumnTextForButtonValue = false,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells,
                 DefaultCellStyle = new DataGridViewCellStyle()
                 {
                     NullValue = "Enable/Disable"
                 },
                 ToolTipText = "Enable or disable this mod"
             };
-            this.dataGridView1.Columns.Insert(6, enableButtonColumn);
+            this.dataGridView1.Columns.Insert(firstButtonColumnIndex + 4, enableButtonColumn);
 
             //bindingSource1?.ResetBindings(false);
             //dataGridView1.Refresh();
@@ -233,13 +239,14 @@ namespace HalfSwordModInstaller
             Cursor.Current = Cursors.Default;
         }
 
+        // This is the easy install procedure for UE4SS and trainer mod
         private void buttonEasyInstall_Click(object sender, EventArgs e)
         {
             var oldText = buttonEasyInstall.Text;
             try
             {
                 buttonEasyInstall.Text = "Working, please wait...";
-                var HSUE4SS = mods.SingleOrDefault(elem => elem.Name == "UE4SS");
+                var HSUE4SS = (HSUE4SS) mods.SingleOrDefault(elem => elem.Name == "UE4SS");
                 if (HSUE4SS.IsBroken)
                 {
                     if (MessageBox.Show($"Broken UE4SS installation detected.\nRepair UE4SS?", "Confirm installation repair",
@@ -254,9 +261,10 @@ namespace HalfSwordModInstaller
                     // We don't reinstall UE4SS here as the mod logic will install it anyway later
                 }
 
-                var HSTM = mods.SingleOrDefault(elem => elem.Name == "HalfSwordTrainerMod");
+                var HSTM = (HSMod) mods.SingleOrDefault(elem => elem.Name == "HalfSwordTrainerMod");
                 if (HSTM.IsInstalled)
                 {
+                    // TODO: should probably show the installed and new versions
                     if (MessageBox.Show($"Really update the mod?", "Confirm update",
                         MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                         MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.No)
@@ -282,6 +290,7 @@ namespace HalfSwordModInstaller
             }
             catch (Exception exc)
             {
+                // TODO: maybe ask the user to upload the log file somewhere?
                 buttonEasyInstall.Text = oldText;
                 MessageBox.Show($"Sorry, something went wrong.\n{exc.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -392,6 +401,13 @@ namespace HalfSwordModInstaller
         private void tabControl1_Selected(object sender, TabControlEventArgs e)
         {
             ConfirmAndRepair();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            var image = this.pictureBox1.Image;
+            image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            this.pictureBox1.Image = image;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace HalfSwordModInstaller
 
         public new void LogMe()
         {
-            HSUtils.Log($"UE4SS=\"{Name}\", Url=\"{Url}\", Version=\"{Version}\", " +
+            HSUtils.Log($"UE4SS=\"{Name}\", Url=\"{Url}\", LatestVersion=\"{LatestVersion}\", " +
                 $"Downloaded={IsDownloaded}, Installed={IsInstalled}, " +
                 $"InstalledVersion={(string.IsNullOrEmpty(InstalledVersion) ? "null" : "\"" + InstalledVersion + "\"")}, " +
                 $"Enabled={IsEnabled}"
@@ -139,7 +139,7 @@ namespace HalfSwordModInstaller
                 {
                     _isInstalled = true;
                     InstalledVersion = "v2.5.2";
-                    Version = InstalledVersion;
+                    // Version = InstalledVersion;
                 }
                 else if ((
                     File.Exists(Path.Combine(HSUtils.HSBinaryPath, "dwmapi.dll"))
@@ -150,7 +150,7 @@ namespace HalfSwordModInstaller
                     _isInstalled = true;
                     // TODO dangerous, should probably detect a real version somehow
                     InstalledVersion = "v3.x.x";
-                    Version= InstalledVersion;
+                    // Version = InstalledVersion;
                 }
                 else
                 {
@@ -199,7 +199,7 @@ namespace HalfSwordModInstaller
             {
                 string dllBak, dllOK;
 
-                if (Version == "v2.5.2")
+                if (InstalledVersion == "v2.5.2")
                 {
                     dllOK = Path.Combine(HSUtils.HSBinaryPath, "xinput1_3.dll");
                     dllBak = Path.Combine(HSUtils.HSBinaryPath, "xinput1_3.dll.bak");
@@ -241,7 +241,7 @@ namespace HalfSwordModInstaller
                 throw new Exception("UE4SS must be installed first!");
             }
 
-            if (Version == "v2.5.2")
+            if (InstalledVersion == "v2.5.2")
             {
                 dllOK = Path.Combine(HSUtils.HSBinaryPath, "xinput1_3.dll");
                 dllBak = Path.Combine(HSUtils.HSBinaryPath, "xinput1_3.dll.bak");

@@ -30,6 +30,8 @@ namespace HalfSwordModInstaller
 
         // The logic around Downloaded/Installed/Enabled is to enforce detection of the actual state on disk
         // The user may manually manipulate mods and we have to reflect that outside changes.
+        // Downloaded means "latest known version downloaded"
+        // TODO implement downloading of other versions
         protected bool _isDownloaded = false;
         public bool IsDownloaded
         {
@@ -37,10 +39,10 @@ namespace HalfSwordModInstaller
             {
                 if (string.IsNullOrEmpty(LocalZipPath))
                 {
-                    if (!string.IsNullOrEmpty(Version))
+                    if (!string.IsNullOrEmpty(LatestVersion))
                     {
-                        string releaseZip = $"{Name}_{Version}.zip";
-                        string downloadsFolder = Path.Combine(HSUtils.HSModInstallerDirPath, "downloads", Name, Version);
+                        string releaseZip = $"{Name}_{LatestVersion}.zip";
+                        string downloadsFolder = Path.Combine(HSUtils.HSModInstallerDirPath, "downloads", Name, LatestVersion);
                         string releaseZipPath = Path.Combine(downloadsFolder, releaseZip);
 
                         if (File.Exists(releaseZipPath))
@@ -78,22 +80,24 @@ namespace HalfSwordModInstaller
         public virtual bool IsEnabled { get; set; }
 
         protected string RelativePath = string.Empty;
-        public string Version { get; set; }
+        // Latest known version from the internet
+        public string LatestVersion { get; set; }
         // For rare cases when we can infer installed version from disk
         public string InstalledVersion { get; set; }
+
         public List<HSInstallable> dependencyGraph;
 
         public HSInstallable(string name, string url, List<HSInstallable> dependencyGraph = null)
         {
             this.Name = name;
             this.Url = url;
-            this.Version = GetLatestVersion();
+            this.LatestVersion = GetLatestVersion();
             this.dependencyGraph = dependencyGraph;
         }
 
         public void LogMe()
         {
-            HSUtils.Log($"Installable object=\"{Name}\", Url=\"{Url}\", Version=\"{Version}\", " +
+            HSUtils.Log($"Installable object=\"{Name}\", Url=\"{Url}\", Version=\"{LatestVersion}\", " +
                 $"Downloaded={IsDownloaded}, Installed={IsInstalled}, Enabled={IsEnabled}"
                 );
         }
@@ -126,6 +130,7 @@ namespace HalfSwordModInstaller
             }
         }
 
+        // Always retrieves latest version and downloads it
         public void Download()
         {
             string tag = GetLatestVersion();
@@ -139,6 +144,7 @@ namespace HalfSwordModInstaller
             }
         }
 
+        // Download specific version by known tag
         public void Download(string tag)
         {
             // Example:
@@ -162,7 +168,7 @@ namespace HalfSwordModInstaller
                     client.DownloadFile(downloadUrl, releaseZipPath);
                     LocalZipPath = releaseZipPath;
                     _isDownloaded = true;
-                    Version = tag;
+                    LatestVersion = tag;
                     HSUtils.Log($"Downloaded mod \"{Name}\" from \"{downloadUrl}\" to \"{releaseZipPath}\"");
                 }
                 catch (Exception e)

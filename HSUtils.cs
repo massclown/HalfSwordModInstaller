@@ -19,6 +19,7 @@ namespace HalfSwordModInstaller
         public static string HSLogicModsPath = null;
         public static string HSUE4SSModsTxt = null;
         public static string HSUE4SSlog = null;
+        public const string BPMLName = "BPModLoaderMod";
 
         // These strings should exist always
         public static string HSModInstallerDirPath = Path.Combine(

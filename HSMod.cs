@@ -14,32 +14,68 @@ namespace HalfSwordModInstaller
         {
             get
             {
+                var modInstallPath = Path.Combine(HSUtils.HSBinaryPath, RelativePath);
                 if (Directory.Exists(Path.Combine(HSUtils.HSBinaryPath, RelativePath)))
                 {
-                    var mainLua = Path.Combine(HSUtils.HSBinaryPath, RelativePath, "scripts\\main.lua");
+                    // TODO this is a very crude way of detecting a development setup with symlinks, but works for now
+                    var attrs = File.GetAttributes(modInstallPath);
+                    if ((attrs & FileAttributes.ReparsePoint) == FileAttributes.ReparsePoint)
+                    {
+                        //HSUtils.Log($"[WARNING] Development setup with symlinks detected for mod \"{this.Name}\"");
+                        _developmentSetup = true;
+                    }
+
+                    var mainLua = Path.Combine(modInstallPath, "scripts\\main.lua");
                     if (File.Exists(mainLua))
                     {
-                        // TODO this is bad
-                        var firstLine = File.ReadLines(mainLua).First();
-                        foreach (Match match in Regex.Matches(firstLine, @"\s(v\d+(\.\d+)+)"))
+                        // Proper version detection in the lua variable mod_version
+                        var luaTextLines = File.ReadLines(mainLua).ToList();
+                        var versionLine = luaTextLines.Find(line => line.StartsWith("local mod_version"));
+                        if (versionLine != null)
                         {
-                            if (match.Success && match.Groups.Count > 0)
+                            foreach (Match match in Regex.Matches(versionLine, @"local mod_version\s+=\s+""(\d+\.\d+)"""))
                             {
-                                InstalledVersion = match.Groups[1].Value;
-                                break;
+                                if (match.Success && match.Groups.Count > 0)
+                                {
+                                    InstalledVersion = "v" + match.Groups[1].Value;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Fallback method, parse the first line of main.lua to get the version from the comment e.g. "-- lolmod v0.1"
+                            var firstLine = luaTextLines.First();
+                            foreach (Match match in Regex.Matches(firstLine, @"\s(v\d+(\.\d+)+)"))
+                            {
+                                if (match.Success && match.Groups.Count > 0)
+                                {
+                                    InstalledVersion = match.Groups[1].Value;
+                                    break;
+                                }
                             }
                         }
                         if (HasLogicMods)
                         {
                             if (Directory.Exists(HSUtils.HSLogicModsPath))
                             {
-                                // TODO compare the actual files with distribution ZIP maybe?
-                                _isInstalled = true;
+                                // TODO properly compare the actual files with distribution ZIP maybe?
+                                if (Directory.GetFiles(HSUtils.HSLogicModsPath, "*", SearchOption.AllDirectories).Length == 0)
+                                {
+                                    // No files in LogicMods means a broken installation == no installation
+                                    HSUtils.Log($"[WARNING] Empty LogicMods folder for mod \"{this.Name}\", assuming it is not installed");
+                                    _isInstalled = false;
+                                }
+                                else
+                                {
+                                    _isInstalled = true;
+                                }
                             }
                             else
                             {
-                                // TODO broken install, LogicMods folder does not exist
+                                // TODO broken install, as LogicMods folder does not exist
                                 // For now return as if not installed
+                                HSUtils.Log($"[WARNING] Missing LogicMods folder for mod \"{this.Name}\", assuming it is not installed");
                                 _isInstalled = false;
                             }
                         }
@@ -52,6 +88,7 @@ namespace HalfSwordModInstaller
                     {
                         // TODO broken install, folder exists but the actual mod not there
                         // For now return as if not installed
+                        HSUtils.Log($"[WARNING] Empty mod folder for mod \"{this.Name}\", assuming it is not installed");
                         _isInstalled = false;
                     }
                 }
@@ -88,7 +125,24 @@ namespace HalfSwordModInstaller
                         }
                         else
                         {
-                            _isEnabled = true;
+                            if (HasLogicMods)
+                            {
+                                int BPMLIndexEnabled = lines.FindIndex(line => line.Trim().Equals($"{HSUtils.BPMLName} : 1"));
+                                if (BPMLIndexEnabled < 0)
+                                {
+                                    // Lua part of our mod is enabled, but BPModLoaderMod is not enabled,
+                                    // so we consider our mod to be not enabled as well
+                                    _isEnabled = false;
+                                }
+                                else
+                                {
+                                    _isEnabled = true;
+                                }
+                            }
+                            else
+                            {
+                                _isEnabled = true;
+                            }
                         }
                     }
                 }
@@ -123,6 +177,7 @@ namespace HalfSwordModInstaller
          *                       |                  V V                V                |
          *                       +--------------> Broken <-------------+----------------+
          **/
+        /*
         public enum ModState
         {
             Unknown,        // Latest version is unknown yet, nothing on disk
@@ -133,6 +188,21 @@ namespace HalfSwordModInstaller
             Disabled,       // Installed and disabled (record in mods.txt)
             Broken          // Unusable, broken (downloaded and can't be installed, or installed and unusable)
         }
+        */
+
+        // Development setup for mods is done with symlinks from the game mods folder to somewhere else (e.g. a git repo)
+        protected bool _developmentSetup = false;
+        public bool DevelopmentSetup
+        {
+            get
+            {
+                return _developmentSetup;
+            }
+            set
+            { 
+                _developmentSetup |= value;
+            }
+        }
 
         public HSMod(string name, string url, bool hasLogicMods, List<HSInstallable> dependencyGraph) : base(name, url, dependencyGraph)
         {
@@ -142,8 +212,10 @@ namespace HalfSwordModInstaller
 
         public new void LogMe()
         {
-            HSUtils.Log($"Mod=\"{Name}\", Url=\"{Url}\", Version=\"{Version}\", " +
-                $"Downloaded={IsDownloaded}, Installed={IsInstalled}, Enabled={IsEnabled}, " +
+            HSUtils.Log($"Mod=\"{Name}\", Url=\"{Url}\", LatestVersion=\"{LatestVersion}\", " +
+                $"Downloaded={IsDownloaded}, Installed={IsInstalled}, " +
+                $"InstalledVersion={(string.IsNullOrEmpty(InstalledVersion) ? "null" : "\"" + InstalledVersion + "\"")}, " +
+                $"Enabled={IsEnabled}, " +
                 $"HasLogicMods={HasLogicMods}");
         }
         public override void Install()
@@ -209,7 +281,7 @@ namespace HalfSwordModInstaller
                 }
                 Directory.Delete(tempLogicMods);
             }
-            InstalledVersion = Version;
+            InstalledVersion = LatestVersion;
             HSUtils.Log($"Installed mod \"{Name}\" from \"{LocalZipPath}\" to \"{unzipFolder}\"");
         }
 
@@ -223,6 +295,7 @@ namespace HalfSwordModInstaller
             }
             Directory.Delete(Path.Combine(HSUtils.HSBinaryPath, RelativePath), true);
             // TODO DANGER this does not account for which exact files this mod has in LogicMods
+            // TODO DANGER We just delete all of them
             if (HasLogicMods)
             {
                 foreach (FileInfo file in new DirectoryInfo(HSUtils.HSLogicModsPath).EnumerateFiles())
@@ -237,7 +310,8 @@ namespace HalfSwordModInstaller
             EditModsTxt(Name, isEnabled);
             if (HasLogicMods)
             {
-                EditModsTxt("BPModLoaderMod", isEnabled);
+                // We force-enable the BPModLoaderMod
+                EditModsTxt(HSUtils.BPMLName, isEnabled);
             }
             if (isEnabled)
             {
