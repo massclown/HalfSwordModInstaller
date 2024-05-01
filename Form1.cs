@@ -128,6 +128,11 @@ namespace HalfSwordModInstaller
                 var currentCell = dataGridView1[e.ColumnIndex, e.RowIndex];
                 if (currentCell is DataGridViewButtonCell buttonCell)
                 {
+                    if (HSUtils.IsHalfSwordRunning())
+                    {
+                        MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
                     var row = dataGridView1.Rows[e.RowIndex];
                     var mod = (HSInstallable)row.DataBoundItem;
                     switch (dataGridView1.Columns[e.ColumnIndex].Name)
@@ -246,6 +251,14 @@ namespace HalfSwordModInstaller
             try
             {
                 buttonEasyInstall.Text = "Working, please wait...";
+
+                if (HSUtils.IsHalfSwordRunning())
+                {
+                    MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    buttonEasyInstall.Text = oldText;
+                    return;
+                }
+
                 var HSUE4SS = (HSUE4SS) mods.SingleOrDefault(elem => elem.Name == "UE4SS");
                 if (HSUE4SS.IsBroken)
                 {
@@ -298,6 +311,12 @@ namespace HalfSwordModInstaller
 
         private void buttonUninstallAll_Click(object sender, EventArgs e)
         {
+            if (HSUtils.IsHalfSwordRunning())
+            {
+                MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (MessageBox.Show($"Really uninstall everything?", "Confirm uninstallation",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
                 MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.Yes)

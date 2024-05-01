@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace HalfSwordModInstaller
 {
@@ -122,6 +123,22 @@ namespace HalfSwordModInstaller
             {
                 archive.ExtractToDirectory(destinationDirectoryName, true); // Set to 'true' to overwrite
             }
+        }
+
+        public static bool IsProcessRunning(string processName)
+        {
+            Process[] processes = Process.GetProcessesByName(processName);
+            return processes.Length > 0;
+        }
+
+        public static bool IsHalfSwordRunning()
+        {
+            var isHalfSwordRunningFlag = IsProcessRunning("HalfSwordUE5-Win64-Shipping");
+            if (isHalfSwordRunningFlag)
+            {
+                HSUtils.Log($"[WARNING] Half Sword game is running!");
+            }
+            return isHalfSwordRunningFlag;
         }
 
         static HSUtils()
