@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Security.Principal;
 
 namespace HalfSwordModInstaller
 {
@@ -141,6 +142,15 @@ namespace HalfSwordModInstaller
             return isHalfSwordRunningFlag;
         }
 
+        public static bool IsRunningAsAdmin()
+        {
+            using (var identity = WindowsIdentity.GetCurrent())
+            {
+                var principal = new WindowsPrincipal(identity);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+        }
+        
         static HSUtils()
         {
             if (!Directory.Exists(HSModInstallerDirPath))

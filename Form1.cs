@@ -53,6 +53,11 @@ namespace HalfSwordModInstaller
                 HSUtils.Log($"Steam install path found for Half Sword: \"{HSPath}\"");
             }
 
+            if (HSUtils.IsRunningAsAdmin())
+            {
+                HSUtils.Log($"[WARNING] Installer running as admin!");
+            }
+
             // TODO have the list of mods downloaded from somewhere. Hardcoding it for now
             // TODO define the dependencies by name instead of by actual HSInstallable object
 
@@ -128,6 +133,16 @@ namespace HalfSwordModInstaller
                 var currentCell = dataGridView1[e.ColumnIndex, e.RowIndex];
                 if (currentCell is DataGridViewButtonCell buttonCell)
                 {
+                    if (HSUtils.IsRunningAsAdmin())
+                    {
+                        if (MessageBox.Show($"You ran the installer as administrator.\nAre you sure you want that?", "Confirm",
+                            MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                            MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.No)
+                        {
+                            return;
+                        }
+                    }
+
                     if (HSUtils.IsHalfSwordRunning())
                     {
                         MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -250,6 +265,16 @@ namespace HalfSwordModInstaller
             var oldText = buttonEasyInstall.Text;
             try
             {
+                if (HSUtils.IsRunningAsAdmin())
+                {
+                    if (MessageBox.Show($"You ran the installer as administrator.\nAre you sure you want that?", "Confirm",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                        MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.No)
+                    {
+                        return;
+                    }
+                }
+
                 buttonEasyInstall.Text = "Working, please wait...";
 
                 if (HSUtils.IsHalfSwordRunning())
@@ -315,6 +340,16 @@ namespace HalfSwordModInstaller
             {
                 MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
+            }
+
+            if (HSUtils.IsRunningAsAdmin())
+            {
+                if (MessageBox.Show($"You ran the installer as administrator.\nAre you sure you want that?", "Confirm",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2) == System.Windows.Forms.DialogResult.No)
+                {
+                    return;
+                }
             }
 
             if (MessageBox.Show($"Really uninstall everything?", "Confirm uninstallation",
