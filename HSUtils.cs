@@ -36,16 +36,17 @@ namespace HalfSwordModInstaller
         {
             // Find the Steam install directory from the registry
             string steamPathHKCU = (string)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam", "SteamPath", null);
+            string steamPathHKLM64 = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam", "InstallPath", null);
             string steamPathHKLM = (string)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam", "InstallPath", null);
 
-            if (steamPathHKCU == null && steamPathHKLM == null)
+            if (steamPathHKCU == null && steamPathHKLM == null && steamPathHKLM64 == null)
             {
                 throw new InvalidOperationException("[ERROR] Steam is not installed on this machine. No valid registry paths found.");
             }
 
             // Replace slashes to match the system's format for HKCU path that has format c:/program files (x86)/steam
             // Or, if that one was not found, use HKLM path instead
-            string firstSteamPathFound = (steamPathHKCU != null) ? steamPathHKCU.Replace("/", "\\") : steamPathHKLM;
+            string firstSteamPathFound = (steamPathHKCU != null) ? steamPathHKCU.Replace("/", "\\") : (steamPathHKLM != null) ? steamPathHKLM : steamPathHKLM64 ;
 
             // Path to the libraryfolders.vdf which contains paths to all Steam libraries
             string libraryFoldersPath = Path.Combine(firstSteamPathFound, "steamapps", "libraryfolders.vdf");
@@ -84,6 +85,7 @@ namespace HalfSwordModInstaller
             // Computer\HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam\Apps\2642680
             int installedHKCU = (int)Registry.GetValue(@"HKEY_CURRENT_USER\Software\Valve\Steam\Apps\" + appId.ToString(), "Installed", 0);
             int installedHKLM = (int)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Valve\Steam\Apps\" + appId.ToString(), "Installed", 0);
+            int installedHKLM64 = (int)Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam\Apps\" + appId.ToString(), "Installed", 0);
 
             if (installedHKCU == 1)
             {
@@ -93,8 +95,12 @@ namespace HalfSwordModInstaller
             {
                 HSUtils.Log($"[WARNING] Valid Steam game entry present in registry [HKLM], but no valid appmanifest on disk was found.");
             }
+            if (installedHKLM64 == 1)
+            {
+                HSUtils.Log($"[WARNING] Valid Steam game entry present in registry [HKLM 64-bit], but no valid appmanifest on disk was found.");
+            }
 
-            throw new InvalidOperationException($"[ERROR] Steam game with App ID {appId} is not installed or not found.");
+            throw new InvalidOperationException($"[ERROR] Steam game with App ID {appId} is not installed or could not be found.");
         }
 
         public static void Log(string message)
