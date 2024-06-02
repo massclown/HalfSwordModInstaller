@@ -33,8 +33,17 @@ namespace HalfSwordModInstaller
         // This uninstalls everything, starting from UE4SS
         private void EasyUninstall()
         {
-            var UE4SS = (HSUE4SS) mods.SingleOrDefault(elem => elem.Name == "UE4SS");
-            UE4SS.Uninstall();
+            try
+            {
+                var UE4SS = (HSUE4SS)mods.SingleOrDefault(elem => elem.Name == "UE4SS");
+                UE4SS.Uninstall();
+
+            }
+            catch (Exception ex)
+            {
+                HSUtils.Log($"[ERROR] An error occurred while easy-uninstalling: {ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -56,6 +65,20 @@ namespace HalfSwordModInstaller
             if (HSUtils.IsRunningAsAdmin())
             {
                 HSUtils.Log($"[WARNING] Installer running as admin!");
+            }
+
+            if (HSUtils.IsHalfSwordRunning())
+            {
+                MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            if (HSUtils.IsAnotherInstallerRunning())
+            {
+                MessageBox.Show($"Another mod installer is running, please exit that installer and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
             }
 
             // TODO have the list of mods downloaded from somewhere. Hardcoding it for now
@@ -148,6 +171,13 @@ namespace HalfSwordModInstaller
                         MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
+
+                    if (HSUtils.IsAnotherInstallerRunning())
+                    {
+                        MessageBox.Show($"Another mod installer is running, please exit that installer and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
                     var row = dataGridView1.Rows[e.RowIndex];
                     var mod = (HSInstallable)row.DataBoundItem;
                     switch (dataGridView1.Columns[e.ColumnIndex].Name)
@@ -262,6 +292,8 @@ namespace HalfSwordModInstaller
         // This is the easy install procedure for UE4SS and trainer mod
         private void buttonEasyInstall_Click(object sender, EventArgs e)
         {
+            HSUtils.Log($"Running easy install...");
+
             var oldText = buttonEasyInstall.Text;
             try
             {
@@ -284,7 +316,14 @@ namespace HalfSwordModInstaller
                     return;
                 }
 
-                var HSUE4SS = (HSUE4SS) mods.SingleOrDefault(elem => elem.Name == "UE4SS");
+                if (HSUtils.IsAnotherInstallerRunning())
+                {
+                    MessageBox.Show($"Another mod installer is running, please exit that installer and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    buttonEasyInstall.Text = oldText;
+                    return;
+                }
+
+                var HSUE4SS = (HSUE4SS)mods.SingleOrDefault(elem => elem.Name == "UE4SS");
                 if (HSUE4SS.IsBroken)
                 {
                     if (MessageBox.Show($"Broken UE4SS installation detected.\nRepair UE4SS?", "Confirm installation repair",
@@ -299,7 +338,7 @@ namespace HalfSwordModInstaller
                     // We don't reinstall UE4SS here as the mod logic will install it anyway later
                 }
 
-                var HSTM = (HSMod) mods.SingleOrDefault(elem => elem.Name == "HalfSwordTrainerMod");
+                var HSTM = (HSMod)mods.SingleOrDefault(elem => elem.Name == "HalfSwordTrainerMod");
                 if (HSTM.IsInstalled)
                 {
                     // TODO: should probably show the installed and new versions
@@ -323,22 +362,31 @@ namespace HalfSwordModInstaller
                 bindingSource1?.ResetBindings(false);
                 dataGridView1.Refresh();
                 Cursor.Current = Cursors.Default;
-
+                HSUtils.Log($"Easy install finished");
                 MessageBox.Show($"Half Sword Trainer Mod successfully installed!", "Success!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            catch (Exception exc)
+            catch (Exception ex)
             {
+                HSUtils.Log($"[ERROR] An error occurred while easy-installing: {ex.Message}");
+                HSUtils.Log(ex.StackTrace);
                 // TODO: maybe ask the user to upload the log file somewhere?
                 buttonEasyInstall.Text = oldText;
-                MessageBox.Show($"Sorry, something went wrong.\n{exc.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Sorry, something went wrong.\n{ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void buttonUninstallAll_Click(object sender, EventArgs e)
         {
+            HSUtils.Log($"Easy uninstall started");
             if (HSUtils.IsHalfSwordRunning())
             {
                 MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (HSUtils.IsAnotherInstallerRunning())
+            {
+                MessageBox.Show($"Another mod installer is running, please exit that installer and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -361,6 +409,7 @@ namespace HalfSwordModInstaller
                 bindingSource1?.ResetBindings(false);
                 dataGridView1.Refresh();
                 StatusStipTextUpdate();
+                HSUtils.Log($"Easy uninstall finished");
             }
         }
 

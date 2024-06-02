@@ -31,9 +31,11 @@ namespace HalfSwordModInstaller
 
         public override void Install()
         {
+            HSUtils.Log($"Installing UE4SS...");
             // TODO this is bad, we should probably fix it in another way
             if (IsInstalled)
             {
+                HSUtils.Log($"UE4SS already installed, will uninstall first");
                 Uninstall();
             }
 
@@ -43,17 +45,35 @@ namespace HalfSwordModInstaller
             }
 
             string unzipFolder = HSUtils.HSBinaryPath;
-            HSUtils.ForceExtractToDirectory(LocalZipPath, unzipFolder);
-
-            // patch "GraphicsAPI = opengl" in UE4SS-settings.ini
-            var UE4SSSettingsIni = Path.Combine(HSUtils.HSBinaryPath, "UE4SS-settings.ini");
-            var lines = File.ReadAllLines(UE4SSSettingsIni).ToList();
-            int keyIndex = lines.FindIndex(line => line.StartsWith("GraphicsAPI = "));
-
-            if (keyIndex != -1)
+            try
             {
-                lines[keyIndex] = "GraphicsAPI = d3d11";
-                File.WriteAllLines(UE4SSSettingsIni, lines);
+                HSUtils.ForceExtractToDirectory(LocalZipPath, unzipFolder);
+            }
+            catch (Exception ex)
+            {
+                HSUtils.Log($"[ERROR] An error occurred while installing UE4SS from \"{LocalZipPath}\" to \"{unzipFolder}\": {ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+                return;
+            }
+            // patch "GraphicsAPI = opengl" into d3d11 in UE4SS-settings.ini\
+            // No idea which is the correct one, d3d11 or dx11, but opengl surely leads to a white screen in UE4SS, so patching
+            var UE4SSSettingsIni = Path.Combine(HSUtils.HSBinaryPath, "UE4SS-settings.ini");
+            try
+            {
+                var lines = File.ReadAllLines(UE4SSSettingsIni).ToList();
+                int keyIndex = lines.FindIndex(line => line.StartsWith("GraphicsAPI = "));
+
+                if (keyIndex != -1)
+                {
+                    lines[keyIndex] = "GraphicsAPI = d3d11";
+                    File.WriteAllLines(UE4SSSettingsIni, lines);
+                }
+            }
+            catch (Exception ex)
+            {
+                HSUtils.Log($"[ERROR] An error occurred while configuring UE4SS in \"{UE4SSSettingsIni}\": {ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+                return;
             }
             // We probably need to refresh the detected values of IsInstalled, IsEnabled and also use the actual version somehow
             // TODO this is horrible, we are forcing the order of functions so that the version is detected before enabled status, etc.
@@ -67,6 +87,7 @@ namespace HalfSwordModInstaller
         // Readmes and other things are left alone
         public override void Uninstall()
         {
+            HSUtils.Log($"Uninstalling UE4SS...");
             string[] filePaths =
             {
                 "UE4SS.log",
@@ -123,6 +144,7 @@ namespace HalfSwordModInstaller
 
         public override void Update()
         {
+            HSUtils.Log($"Updating UE4SS...");
             Uninstall();
             Install();
             HSUtils.Log($"Updated UE4SS");
@@ -166,8 +188,8 @@ namespace HalfSwordModInstaller
             }
         }
 
-        public override bool IsBroken 
-        { 
+        public override bool IsBroken
+        {
             get
             {
                 if (File.Exists(Path.Combine(HSUtils.HSBinaryPath, "xinput1_3.dll"))

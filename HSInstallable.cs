@@ -121,11 +121,11 @@ namespace HalfSwordModInstaller
                 string tag = releaseUrl.Substring(releaseUrl.LastIndexOf("/") + 1);
                 return tag;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 HSUtils.Log($"[ERROR] Checking version of mod \"{Name}\" from \"{latestUrl}\" failed:");
-                HSUtils.Log(e.Message);
-                HSUtils.Log(e.StackTrace);
+                HSUtils.Log(ex.Message);
+                HSUtils.Log(ex.StackTrace);
                 return null;
             }
         }
@@ -171,11 +171,11 @@ namespace HalfSwordModInstaller
                     LatestVersion = tag;
                     HSUtils.Log($"Downloaded mod \"{Name}\" from \"{downloadUrl}\" to \"{releaseZipPath}\"");
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
                     HSUtils.Log($"[ERROR] Downloading of mod \"{Name}\" from \"{downloadUrl}\" to \"{releaseZipPath}\" failed:");
-                    HSUtils.Log(e.Message);
-                    HSUtils.Log(e.StackTrace);
+                    HSUtils.Log(ex.Message);
+                    HSUtils.Log(ex.StackTrace);
                 }
             }
         }

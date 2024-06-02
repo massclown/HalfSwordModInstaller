@@ -46,7 +46,7 @@ namespace HalfSwordModInstaller
 
             // Replace slashes to match the system's format for HKCU path that has format c:/program files (x86)/steam
             // Or, if that one was not found, use HKLM path instead
-            string firstSteamPathFound = (steamPathHKCU != null) ? steamPathHKCU.Replace("/", "\\") : (steamPathHKLM != null) ? steamPathHKLM : steamPathHKLM64 ;
+            string firstSteamPathFound = (steamPathHKCU != null) ? steamPathHKCU.Replace("/", "\\") : (steamPathHKLM != null) ? steamPathHKLM : steamPathHKLM64;
 
             // Path to the libraryfolders.vdf which contains paths to all Steam libraries
             string libraryFoldersPath = Path.Combine(firstSteamPathFound, "steamapps", "libraryfolders.vdf");
@@ -138,6 +138,22 @@ namespace HalfSwordModInstaller
             return processes.Length > 0;
         }
 
+        public static bool IsAnotherInstallerRunning()
+        {
+            var processes = Process.GetProcesses();
+
+            var filteredProcesses = processes
+                .Where(p => p.ProcessName.ToLower().Contains("HalfSwordModInstaller".ToLower()))
+                .ToList();
+
+            if (filteredProcesses.Count > 1)
+            {
+                HSUtils.Log($"[WARNING] Another installer is running!");
+                return true;
+            }
+            return false;
+        }
+
         public static bool IsHalfSwordRunning()
         {
             var isHalfSwordRunningFlag = IsProcessRunning("HalfSwordUE5-Win64-Shipping");
@@ -156,7 +172,7 @@ namespace HalfSwordModInstaller
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
-        
+
         static HSUtils()
         {
             if (!Directory.Exists(HSModInstallerDirPath))
@@ -168,7 +184,8 @@ namespace HalfSwordModInstaller
             {
                 HSInstallPath = GetGameInstallPath(HSSteamAppID);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 HSUtils.Log($"[ERROR] Exception while finding Half Sword Demo:\n{ex.Message}");
                 HSUtils.Log(ex.StackTrace);
                 HSInstallPath = null;

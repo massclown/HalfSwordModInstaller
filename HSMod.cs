@@ -199,7 +199,7 @@ namespace HalfSwordModInstaller
                 return _developmentSetup;
             }
             set
-            { 
+            {
                 _developmentSetup |= value;
             }
         }
@@ -228,6 +228,7 @@ namespace HalfSwordModInstaller
         }
         public override void Install(bool forceInstallDependencies = false)
         {
+            HSUtils.Log($"Installing mod \"{Name}\" from \"{LocalZipPath}\"...");
             if (this.dependencyGraph?.Count > 0)
             {
                 // TODO should we throw an exception here? Or should we simply install the dependency?
@@ -255,31 +256,41 @@ namespace HalfSwordModInstaller
                 HSUtils.Log($"[ERROR] Cannot install mod \"{Name}\", missing \"Mods\" folder");
                 return;
             }
-            HSUtils.ForceExtractToDirectory(LocalZipPath, unzipFolder);
-            // Clean up by removing readme and license, yes, this is bad. Sorry.
-            string readmePath = Path.Combine(unzipFolder, "README.md");
-            if (File.Exists(readmePath)) { File.Delete(readmePath); }
 
-            string licensePath = Path.Combine(unzipFolder, "LICENSE");
-            if (File.Exists(licensePath)) { File.Delete(licensePath); }
-
-            // TODO this does not account for which exact files this mod has in LogicMods
-            if (HasLogicMods)
+            try
             {
-                var tempLogicMods = Path.Combine(unzipFolder, "LogicMods");
-                // TODO This is all horrible and must be rewritten
-                Directory.CreateDirectory(HSUtils.HSLogicModsPath);
-                foreach (var file in new DirectoryInfo(tempLogicMods).GetFiles())
+                HSUtils.ForceExtractToDirectory(LocalZipPath, unzipFolder);
+                // Clean up by removing readme and license, yes, this is bad. Sorry.
+                string readmePath = Path.Combine(unzipFolder, "README.md");
+                if (File.Exists(readmePath)) { File.Delete(readmePath); }
+
+                string licensePath = Path.Combine(unzipFolder, "LICENSE");
+                if (File.Exists(licensePath)) { File.Delete(licensePath); }
+
+                // TODO this does not account for which exact files this mod has in LogicMods
+                if (HasLogicMods)
                 {
-                    var newFname = Path.Combine(HSUtils.HSLogicModsPath, file.Name);
-                    if (File.Exists(newFname))
+                    var tempLogicMods = Path.Combine(unzipFolder, "LogicMods");
+                    // TODO This is all horrible and must be rewritten
+                    Directory.CreateDirectory(HSUtils.HSLogicModsPath);
+                    foreach (var file in new DirectoryInfo(tempLogicMods).GetFiles())
                     {
-                        HSUtils.Log($"[WARNING] Overwriting file {newFname}");
-                        File.Delete(newFname); 
+                        var newFname = Path.Combine(HSUtils.HSLogicModsPath, file.Name);
+                        if (File.Exists(newFname))
+                        {
+                            HSUtils.Log($"[WARNING] Overwriting file {newFname}");
+                            File.Delete(newFname);
+                        }
+                        file.MoveTo(newFname);
                     }
-                    file.MoveTo(newFname);
+                    Directory.Delete(tempLogicMods);
                 }
-                Directory.Delete(tempLogicMods);
+            }
+            catch (Exception ex)
+            {
+                HSUtils.Log($"[ERROR] An error occurred while installing mod \"{Name}\": {ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+                return;
             }
             InstalledVersion = LatestVersion;
             HSUtils.Log($"Installed mod \"{Name}\" from \"{LocalZipPath}\" to \"{unzipFolder}\"");
@@ -287,22 +298,34 @@ namespace HalfSwordModInstaller
 
         public override void Uninstall()
         {
-            // TODO not sure if we need to erase the mod line from mods.txt or not at this moment
-            // Only disable it for now, leave the line in mods.txt
-            if (IsEnabled)
+            var uninstallPath = Path.Combine(HSUtils.HSBinaryPath, RelativePath);
+            HSUtils.Log($"Uninstalling mod \"{Name}\" from \"{uninstallPath}\"...");
+            try
             {
-                SetEnabled(false);
-            }
-            Directory.Delete(Path.Combine(HSUtils.HSBinaryPath, RelativePath), true);
-            // TODO DANGER this does not account for which exact files this mod has in LogicMods
-            // TODO DANGER We just delete all of them
-            if (HasLogicMods)
-            {
-                foreach (FileInfo file in new DirectoryInfo(HSUtils.HSLogicModsPath).EnumerateFiles())
+                // TODO not sure if we need to erase the mod line from mods.txt or not at this moment
+                // Only disable it for now, leave the line in mods.txt
+                if (IsEnabled)
                 {
-                    file.Delete();
+                    SetEnabled(false);
+                }
+                Directory.Delete(uninstallPath, true);
+                // TODO DANGER this does not account for which exact files this mod has in LogicMods
+                // TODO DANGER We just delete all of them
+                if (HasLogicMods)
+                {
+                    foreach (FileInfo file in new DirectoryInfo(HSUtils.HSLogicModsPath).EnumerateFiles())
+                    {
+                        file.Delete();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                HSUtils.Log($"[ERROR] An error occurred while uninstalling mod \"{Name}\": {ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+                return;
+            }
+            HSUtils.Log($"Uninstalled mod \"{Name}\"");
         }
 
         public override void SetEnabled(bool isEnabled = true)
