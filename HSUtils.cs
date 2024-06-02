@@ -141,9 +141,12 @@ namespace HalfSwordModInstaller
         public static bool IsAnotherInstallerRunning()
         {
             var processes = Process.GetProcesses();
+            var thisProcessName = Process.GetCurrentProcess().ProcessName;
 
             var filteredProcesses = processes
-                .Where(p => p.ProcessName.ToLower().Contains("HalfSwordModInstaller".ToLower()))
+                .Where(p => p.ProcessName.ToLower().Contains("HalfSwordModInstaller".ToLower())
+                || p.ProcessName.ToLower().Contains(thisProcessName.ToLower())
+                )
                 .ToList();
 
             if (filteredProcesses.Count > 1)
