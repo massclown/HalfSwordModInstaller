@@ -1,9 +1,11 @@
 name: build-release
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v[0-9]+.[0-9]+"
-  workflow_dispatch:
+  release:
+    types: [created]
 
 permissions:
   contents: write
@@ -20,6 +22,8 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
     
+    # The following will set the version of the installer to the current git tag name.
+    # The build is deterministic and reproducible, so the same git tag will always produce the same installer
     - name: Build solution
       run: msbuild $env:Solution_Name -t:rebuild -property:Configuration=Release -property:Version="$($env:GITHUB_REF_NAME -replace 'v','').0.0" -property:GitTag=$env:GITHUB_REF_NAME
 
@@ -44,6 +48,7 @@ jobs:
         release_name: ${{ github.ref }}
         body: |
           SHA256 of the installer: `${{ env.RELEASE_SHA256 }}`
+          [Check this file on VirusTotal here](https://www.virustotal.com/gui/file/${{ env.RELEASE_SHA256 }}/detection)
 
     - name: Upload Release Asset
       id: upload-release
@@ -55,14 +60,17 @@ jobs:
         asset_path: ${{ env.Release_Binary }}
         asset_name: HalfSwordModInstaller.exe
         asset_content_type: application/octet-stream
-  virustotal-upload:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: VirusTotal Scan
-        uses: crazy-max/ghaction-virustotal@v4
-        with:
-          vt_api_key: ${{ secrets.VT_API_KEY }}
-          update_release_body: true
-          files: |
-            .exe$        
+
+    - name: VirusTotal Upload
+      id: virustotal-upload
+      uses: crazy-max/ghaction-virustotal@v4
+      with:
+        vt_api_key: ${{ secrets.VT_API_KEY }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        # For now we always add a link to Virustotal results manually above,
+        # as this action will update the release body only when triggered 
+        # from a release event, and this whole workflow may be triggered 
+        # from a push event or manually instead.
+        update_release_body: true
+        files: |
+          ${{ env.Release_Binary }}
