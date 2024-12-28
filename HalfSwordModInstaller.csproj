@@ -32,6 +32,9 @@
     <AssemblyTitle Condition="'$(GitTag)' == ''">Half Sword Mod Installer</AssemblyTitle>
     <Version Condition="'$(Version)' == ''">0.0.0.1</Version>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
@@ -71,6 +74,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -149,14 +153,12 @@
       <AssemblyAttributes Include="AssemblyTitle">
         <_Parameter1>Half Sword Mod Installer $(GitTag)</_Parameter1>
       </AssemblyAttributes>
-     <AssemblyAttributes Include="AssemblyVersion">
+      <AssemblyAttributes Include="AssemblyVersion">
         <_Parameter1>$(Version)</_Parameter1>
-     </AssemblyAttributes>
+      </AssemblyAttributes>
     </ItemGroup>
     <MakeDir Directories="$(IntermediateOutputPath)" />
-    <WriteCodeFragment Language="C#"
-                      OutputFile="$(IntermediateOutputPath)GitTagVersion.cs"
-                      AssemblyAttributes="@(AssemblyAttributes)" />
+    <WriteCodeFragment Language="C#" OutputFile="$(IntermediateOutputPath)GitTagVersion.cs" AssemblyAttributes="@(AssemblyAttributes)" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)GitTagVersion.cs" />
     </ItemGroup>

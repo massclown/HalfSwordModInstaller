@@ -1,6 +1,7 @@
 # Half Sword Mod Installer
 
-It helps to install the known mods for Half Sword demo v0.3 ([Steam release](https://store.steampowered.com/app/2397300/Half_Sword/)).
+It helps to install the known mods for Half Sword demo v0.3 ([Steam release](https://store.steampowered.com/app/2397300/Half_Sword/)) and
+Half Sword Playtest.
 
 USE AT YOUR OWN RISK.
 
@@ -20,7 +21,10 @@ Alternatively, if you have any problems or know what you are doing, open the adv
 
 Here you can download, install and enable individual mods, as well as uninstall or disable them, too.
 
-![Alt text](images/ui_advanced.png?raw=true "Screenshot of installer in advanced mode")
+![Alt text](images/ui_advanced.png?raw=true "Screenshot of installer in advanced mode for demo version")
+
+![Alt text](images/ui_advanced_playtest.png?raw=true "Screenshot of installer in advanced mode for playtest version")
+
 
 The table on the screen shows all the mods that are known by the installer, and their status.
 

@@ -9,17 +9,33 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Security.Principal;
+using System.Windows.Forms;
 
 namespace HalfSwordModInstaller
 {
-    internal static class HSUtils
+    public static class HSUtils
     {
+        public enum HSGameType
+        {
+            None = 0,
+            Demo = 1,
+            Playtest = 2,
+        }
+
+        // The installer was written with Demo in mind, so it's the default. Playtest compatibility is WIP.
+        public static HSGameType ChosenGameType = HSGameType.Demo;
+
         public const int HSSteamAppID = 2642680;
+        public const int HSPlaytestSteamAppID = 2527870;
         // These strings are installation-dependent and may be broken
         public static string HSInstallPath = null;
+        public static string HSInstallPathDemo = null;
+        public static string HSInstallPathPlaytest = null;
         public static string HSBinaryPath = null;
         public static string HSLogicModsPath = null;
+        public static string HSUE4SSPath = null;
         public static string HSUE4SSModsTxt = null;
+        public static string HSUE4SSSettingsIni = null;
         public static string HSUE4SSlog = null;
         public const string BPMLName = "BPModLoaderMod";
 
@@ -159,7 +175,8 @@ namespace HalfSwordModInstaller
 
         public static bool IsHalfSwordRunning()
         {
-            var isHalfSwordRunningFlag = IsProcessRunning("HalfSwordUE5-Win64-Shipping");
+            // We detect both HS demo and HS playtest
+            var isHalfSwordRunningFlag = IsProcessRunning("HalfSwordUE5-Win64-Shipping") && IsProcessRunning("VersionTest54-Win64-Shipping.exe");
             if (isHalfSwordRunningFlag)
             {
                 HSUtils.Log($"[WARNING] Half Sword game is running!");
@@ -176,6 +193,83 @@ namespace HalfSwordModInstaller
             }
         }
 
+        static HSGameType ChooseGameTypeAuto()
+        {
+            bool isPlaytestFound = false;
+            bool isDemoFound = false;
+            try
+            {
+                HSInstallPathDemo = GetGameInstallPath(HSSteamAppID);
+                isDemoFound = true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Do nothing, we threw that
+            }
+            catch (Exception ex)
+            {
+                // Something else happened, maybe we should log it
+                HSUtils.Log($"[ERROR] Exception while finding Half Sword Demo:\n{ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+            }
+            try
+            {
+                HSInstallPathPlaytest = GetGameInstallPath(HSPlaytestSteamAppID);
+                isPlaytestFound = true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Do nothing, we threw that
+            }
+            catch (Exception ex)
+            {
+                // Something else happened, maybe we should log it
+                HSUtils.Log($"[ERROR] Exception while finding Half Sword Playtest:\n{ex.Message}");
+                HSUtils.Log(ex.StackTrace);
+            }
+            if (isPlaytestFound && isDemoFound)
+            {
+                HSUtils.Log($"[WARNING] Both Half Sword Demo and Playtest found.");
+                var result = MessageBox.Show("Both Half Sword Demo and Playtest found.\nDo you want to mod the Playtest?", "Choose Game Type", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result == DialogResult.Yes)
+                {
+                    HSInstallPath = HSInstallPathPlaytest;
+                    return HSGameType.Playtest;
+                }
+                else
+                {
+                    HSInstallPath = HSInstallPathPlaytest;
+                    return HSGameType.Demo;
+                }
+            }
+            if (isPlaytestFound)
+            {
+                HSInstallPath = HSInstallPathPlaytest;
+                return HSGameType.Playtest;
+            }
+            else if (isDemoFound)
+            {
+                HSInstallPath = HSInstallPathDemo;
+                return HSGameType.Demo;
+            }
+            HSUtils.Log($"[ERROR] Could not find neither Half Sword Demo nor Playtest.");
+            return HSGameType.None;
+        }
+
+        static void ChooseGameType(HSGameType newType)
+        {
+            ChosenGameType = newType;
+        }
+
+        static void ChooseDemo()
+        {
+            ChosenGameType = HSGameType.Demo;
+        }
+        static void ChoosePlaytest()
+        {
+            ChosenGameType = HSGameType.Playtest;
+        }
+
         static HSUtils()
         {
             if (!Directory.Exists(HSModInstallerDirPath))
@@ -185,7 +279,9 @@ namespace HalfSwordModInstaller
 
             try
             {
-                HSInstallPath = GetGameInstallPath(HSSteamAppID);
+                ChosenGameType = ChooseGameTypeAuto();
+                // This is a side effect of the above function, yes, bad idea
+                // HSInstallPath = GetGameInstallPath(HSSteamAppID);
             }
             catch (Exception ex)
             {
@@ -195,10 +291,52 @@ namespace HalfSwordModInstaller
                 return;
             }
 
-            HSBinaryPath = Path.Combine(HSInstallPath, "HalfSwordUE5\\Binaries\\Win64");
-            HSLogicModsPath = Path.GetFullPath(Path.Combine(HSBinaryPath, "..\\..\\Content\\Paks\\LogicMods"));
-            HSUE4SSModsTxt = Path.Combine(HSBinaryPath, "Mods", "mods.txt");
-            HSUE4SSlog = Path.Combine(HSBinaryPath, "UE4SS.log");
+            recalculateGamePaths();
+
+            if (ChosenGameType == HSGameType.None)
+            {
+                HSUtils.Log($"[ERROR] Could not find neither Half Sword Demo nor Playtest.");
+                HSInstallPath = null;
+                return;
+            }
+        }
+
+        public static void recalculateGamePaths()
+        {
+            if (ChosenGameType == HSGameType.Playtest)
+            {
+                // HSInstallPath = GetGameInstallPath(HSPlaytestSteamAppID);
+                HSInstallPath = HSInstallPathPlaytest;
+                HSBinaryPath = Path.Combine(HSInstallPath, "VersionTest54\\Binaries\\Win64");
+                // As playtest requires UE4SS experimental, we take the different folder structure into account 
+                HSUE4SSPath = Path.Combine(HSBinaryPath, "ue4ss");
+                HSLogicModsPath = Path.GetFullPath(Path.Combine(HSBinaryPath, "..\\..\\Content\\Paks\\LogicMods"));
+                HSUE4SSModsTxt = Path.Combine(HSUE4SSPath, "Mods", "mods.txt");
+                HSUE4SSSettingsIni = Path.Combine(HSUE4SSPath, "UE4SS-settings.ini");
+                HSUE4SSlog = Path.Combine(HSUE4SSPath, "UE4SS.log");
+            }
+            else if (ChosenGameType == HSGameType.Demo)
+            {
+                // HSInstallPath = GetGameInstallPath(HSSteamAppID);
+                HSInstallPath = HSInstallPathDemo;
+                HSBinaryPath = Path.Combine(HSInstallPath, "HalfSwordUE5\\Binaries\\Win64");
+                HSUE4SSPath = HSBinaryPath;
+                HSLogicModsPath = Path.GetFullPath(Path.Combine(HSBinaryPath, "..\\..\\Content\\Paks\\LogicMods"));
+                HSUE4SSModsTxt = Path.Combine(HSUE4SSPath, "Mods", "mods.txt");
+                HSUE4SSSettingsIni = Path.Combine(HSUE4SSPath, "UE4SS-settings.ini");
+                HSUE4SSlog = Path.Combine(HSUE4SSPath, "UE4SS.log");
+            }
+            else
+            {
+                // Not sure what to do, maybe set to nulls?
+                HSInstallPath = null;
+                HSBinaryPath = null;
+                HSUE4SSPath = null;
+                HSLogicModsPath = null;
+                HSUE4SSModsTxt = null;
+                HSUE4SSSettingsIni = null;
+                HSUE4SSlog = null;
+            }
         }
 
     }

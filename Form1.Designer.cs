@@ -42,13 +42,6 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.buttonUE4SSLog = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
-            this.buttonCopyUE4SSLog = new System.Windows.Forms.Button();
-            this.buttonCopyInstallerLog = new System.Windows.Forms.Button();
-            this.buttonInstallerLog = new System.Windows.Forms.Button();
-            this.buttonUninstallAll = new System.Windows.Forms.Button();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.NameColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.VersionColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.InstalledVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -56,6 +49,17 @@
             this.IsInstalledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.IsEnabledColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ModWebURL = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.IsExperimentalColumn = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
+            this.buttonCopyUE4SSLog = new System.Windows.Forms.Button();
+            this.buttonCopyInstallerLog = new System.Windows.Forms.Button();
+            this.buttonInstallerLog = new System.Windows.Forms.Button();
+            this.buttonUninstallAll = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.radioButton1demo = new System.Windows.Forms.RadioButton();
+            this.radioButton2playtest = new System.Windows.Forms.RadioButton();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -65,6 +69,7 @@
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // statusStrip1
@@ -171,16 +176,19 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66583F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.6675F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 16.66583F));
-            this.tableLayoutPanel1.Controls.Add(this.buttonUE4SSLog, 2, 1);
-            this.tableLayoutPanel1.Controls.Add(this.dataGridView1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.buttonCopyUE4SSLog, 3, 1);
-            this.tableLayoutPanel1.Controls.Add(this.buttonCopyInstallerLog, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.buttonInstallerLog, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.buttonUninstallAll, 5, 1);
+            this.tableLayoutPanel1.Controls.Add(this.buttonUE4SSLog, 2, 3);
+            this.tableLayoutPanel1.Controls.Add(this.dataGridView1, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.buttonCopyUE4SSLog, 3, 3);
+            this.tableLayoutPanel1.Controls.Add(this.buttonCopyInstallerLog, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.buttonInstallerLog, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.buttonUninstallAll, 5, 3);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox1, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.Size = new System.Drawing.Size(1368, 696);
@@ -220,82 +228,23 @@
             this.IsDownloadedColumn,
             this.IsInstalledColumn,
             this.IsEnabledColumn,
-            this.ModWebURL});
+            this.ModWebURL,
+            this.IsExperimentalColumn});
             this.tableLayoutPanel1.SetColumnSpan(this.dataGridView1, 6);
             this.dataGridView1.DataSource = this.bindingSource1;
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView1.Location = new System.Drawing.Point(3, 3);
+            this.dataGridView1.Location = new System.Drawing.Point(3, 97);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(1362, 642);
+            this.dataGridView1.Size = new System.Drawing.Size(1362, 548);
             this.dataGridView1.TabIndex = 0;
             this.toolTip1.SetToolTip(this.dataGridView1, "List of all mods and their status");
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
+            this.dataGridView1.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellValueChanged);
             this.dataGridView1.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dataGridView1_RowsAdded);
-            // 
-            // buttonCopyUE4SSLog
-            // 
-            this.buttonCopyUE4SSLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonCopyUE4SSLog.AutoSize = true;
-            this.buttonCopyUE4SSLog.Location = new System.Drawing.Point(723, 651);
-            this.buttonCopyUE4SSLog.Name = "buttonCopyUE4SSLog";
-            this.buttonCopyUE4SSLog.Size = new System.Drawing.Size(147, 42);
-            this.buttonCopyUE4SSLog.TabIndex = 5;
-            this.buttonCopyUE4SSLog.Text = "Copy UE4SS log\r\nfilename to clipboard";
-            this.toolTip1.SetToolTip(this.buttonCopyUE4SSLog, "Copy the filename of the UE4SS log file to clipboard, so you can find it later");
-            this.buttonCopyUE4SSLog.UseVisualStyleBackColor = true;
-            this.buttonCopyUE4SSLog.Click += new System.EventHandler(this.buttonCopyUE4SSLog_Click);
-            // 
-            // buttonCopyInstallerLog
-            // 
-            this.buttonCopyInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonCopyInstallerLog.AutoSize = true;
-            this.buttonCopyInstallerLog.Location = new System.Drawing.Point(268, 651);
-            this.buttonCopyInstallerLog.Name = "buttonCopyInstallerLog";
-            this.buttonCopyInstallerLog.Size = new System.Drawing.Size(147, 42);
-            this.buttonCopyInstallerLog.TabIndex = 4;
-            this.buttonCopyInstallerLog.Text = "Copy installer log\r\nfilename to clipboard";
-            this.toolTip1.SetToolTip(this.buttonCopyInstallerLog, "Copy the filename of the installer log file to clipboard, so you can find it late" +
-        "r");
-            this.buttonCopyInstallerLog.UseVisualStyleBackColor = true;
-            this.buttonCopyInstallerLog.Click += new System.EventHandler(this.buttonCopyInstallerLog_Click);
-            // 
-            // buttonInstallerLog
-            // 
-            this.buttonInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonInstallerLog.AutoSize = true;
-            this.buttonInstallerLog.Location = new System.Drawing.Point(40, 651);
-            this.buttonInstallerLog.Name = "buttonInstallerLog";
-            this.buttonInstallerLog.Size = new System.Drawing.Size(147, 42);
-            this.buttonInstallerLog.TabIndex = 1;
-            this.buttonInstallerLog.Text = "Open installer log";
-            this.toolTip1.SetToolTip(this.buttonInstallerLog, "Open the log file of this installer");
-            this.buttonInstallerLog.UseVisualStyleBackColor = true;
-            this.buttonInstallerLog.Click += new System.EventHandler(this.buttonInstallerLog_Click);
-            // 
-            // buttonUninstallAll
-            // 
-            this.buttonUninstallAll.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.buttonUninstallAll.AutoSize = true;
-            this.buttonUninstallAll.BackColor = System.Drawing.Color.Transparent;
-            this.buttonUninstallAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.buttonUninstallAll.Location = new System.Drawing.Point(1179, 651);
-            this.buttonUninstallAll.Name = "buttonUninstallAll";
-            this.buttonUninstallAll.Size = new System.Drawing.Size(147, 42);
-            this.buttonUninstallAll.TabIndex = 3;
-            this.buttonUninstallAll.Text = "Uninstall all mods";
-            this.toolTip1.SetToolTip(this.buttonUninstallAll, "Uninstall all mods, including UE4SS");
-            this.buttonUninstallAll.UseVisualStyleBackColor = false;
-            this.buttonUninstallAll.Click += new System.EventHandler(this.buttonUninstallAll_Click);
-            // 
-            // backgroundWorker1
-            // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
             // NameColumn
             // 
@@ -368,6 +317,116 @@
             this.ModWebURL.TrackVisitedState = false;
             this.ModWebURL.Width = 43;
             // 
+            // IsExperimentalColumn
+            // 
+            this.IsExperimentalColumn.DataPropertyName = "IsExperimental";
+            this.IsExperimentalColumn.FalseValue = "false";
+            this.IsExperimentalColumn.HeaderText = "Experimental?";
+            this.IsExperimentalColumn.IndeterminateValue = "false";
+            this.IsExperimentalColumn.MinimumWidth = 6;
+            this.IsExperimentalColumn.Name = "IsExperimentalColumn";
+            this.IsExperimentalColumn.TrueValue = "true";
+            this.IsExperimentalColumn.Width = 125;
+            // 
+            // buttonCopyUE4SSLog
+            // 
+            this.buttonCopyUE4SSLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonCopyUE4SSLog.AutoSize = true;
+            this.buttonCopyUE4SSLog.Location = new System.Drawing.Point(723, 651);
+            this.buttonCopyUE4SSLog.Name = "buttonCopyUE4SSLog";
+            this.buttonCopyUE4SSLog.Size = new System.Drawing.Size(147, 42);
+            this.buttonCopyUE4SSLog.TabIndex = 5;
+            this.buttonCopyUE4SSLog.Text = "Copy UE4SS log\r\nfilename to clipboard";
+            this.toolTip1.SetToolTip(this.buttonCopyUE4SSLog, "Copy the filename of the UE4SS log file to clipboard, so you can find it later");
+            this.buttonCopyUE4SSLog.UseVisualStyleBackColor = true;
+            this.buttonCopyUE4SSLog.Click += new System.EventHandler(this.buttonCopyUE4SSLog_Click);
+            // 
+            // buttonCopyInstallerLog
+            // 
+            this.buttonCopyInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonCopyInstallerLog.AutoSize = true;
+            this.buttonCopyInstallerLog.Location = new System.Drawing.Point(268, 651);
+            this.buttonCopyInstallerLog.Name = "buttonCopyInstallerLog";
+            this.buttonCopyInstallerLog.Size = new System.Drawing.Size(147, 42);
+            this.buttonCopyInstallerLog.TabIndex = 4;
+            this.buttonCopyInstallerLog.Text = "Copy installer log\r\nfilename to clipboard";
+            this.toolTip1.SetToolTip(this.buttonCopyInstallerLog, "Copy the filename of the installer log file to clipboard, so you can find it late" +
+        "r");
+            this.buttonCopyInstallerLog.UseVisualStyleBackColor = true;
+            this.buttonCopyInstallerLog.Click += new System.EventHandler(this.buttonCopyInstallerLog_Click);
+            // 
+            // buttonInstallerLog
+            // 
+            this.buttonInstallerLog.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonInstallerLog.AutoSize = true;
+            this.buttonInstallerLog.Location = new System.Drawing.Point(40, 651);
+            this.buttonInstallerLog.Name = "buttonInstallerLog";
+            this.buttonInstallerLog.Size = new System.Drawing.Size(147, 42);
+            this.buttonInstallerLog.TabIndex = 1;
+            this.buttonInstallerLog.Text = "Open installer log";
+            this.toolTip1.SetToolTip(this.buttonInstallerLog, "Open the log file of this installer");
+            this.buttonInstallerLog.UseVisualStyleBackColor = true;
+            this.buttonInstallerLog.Click += new System.EventHandler(this.buttonInstallerLog_Click);
+            // 
+            // buttonUninstallAll
+            // 
+            this.buttonUninstallAll.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.buttonUninstallAll.AutoSize = true;
+            this.buttonUninstallAll.BackColor = System.Drawing.Color.Transparent;
+            this.buttonUninstallAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonUninstallAll.Location = new System.Drawing.Point(1179, 651);
+            this.buttonUninstallAll.Name = "buttonUninstallAll";
+            this.buttonUninstallAll.Size = new System.Drawing.Size(147, 42);
+            this.buttonUninstallAll.TabIndex = 3;
+            this.buttonUninstallAll.Text = "Uninstall all mods";
+            this.toolTip1.SetToolTip(this.buttonUninstallAll, "Uninstall all mods, including UE4SS");
+            this.buttonUninstallAll.UseVisualStyleBackColor = false;
+            this.buttonUninstallAll.Click += new System.EventHandler(this.buttonUninstallAll_Click);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.AutoSize = true;
+            this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.tableLayoutPanel1.SetColumnSpan(this.groupBox1, 6);
+            this.groupBox1.Controls.Add(this.radioButton1demo);
+            this.groupBox1.Controls.Add(this.radioButton2playtest);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox1.Location = new System.Drawing.Point(3, 3);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(1362, 88);
+            this.groupBox1.TabIndex = 8;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Target game to mod:";
+            // 
+            // radioButton1demo
+            // 
+            this.radioButton1demo.AutoSize = true;
+            this.radioButton1demo.Location = new System.Drawing.Point(6, 21);
+            this.radioButton1demo.Name = "radioButton1demo";
+            this.radioButton1demo.Size = new System.Drawing.Size(337, 20);
+            this.radioButton1demo.TabIndex = 6;
+            this.radioButton1demo.TabStop = true;
+            this.radioButton1demo.Text = "Half Sword Demo (\"dark, endless abyss\", Nov 2023)";
+            this.radioButton1demo.UseVisualStyleBackColor = true;
+            this.radioButton1demo.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
+            // 
+            // radioButton2playtest
+            // 
+            this.radioButton2playtest.AutoSize = true;
+            this.radioButton2playtest.Location = new System.Drawing.Point(6, 47);
+            this.radioButton2playtest.Name = "radioButton2playtest";
+            this.radioButton2playtest.Size = new System.Drawing.Size(294, 20);
+            this.radioButton2playtest.TabIndex = 7;
+            this.radioButton2playtest.TabStop = true;
+            this.radioButton2playtest.Text = "Half Sword Playtest (\"castle courtyard\", 2024)";
+            this.radioButton2playtest.UseVisualStyleBackColor = true;
+            this.radioButton2playtest.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -391,6 +450,8 @@
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -423,6 +484,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn IsInstalledColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn IsEnabledColumn;
         private System.Windows.Forms.DataGridViewLinkColumn ModWebURL;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn IsExperimentalColumn;
+        private System.Windows.Forms.RadioButton radioButton1demo;
+        private System.Windows.Forms.RadioButton radioButton2playtest;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }
 

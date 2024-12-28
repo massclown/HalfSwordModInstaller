@@ -2,14 +2,54 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http;
 using System.Security.Policy;
+using System.Web.Script.Serialization;
+using System.Text.RegularExpressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Net;
+using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace HalfSwordModInstaller
 {
     public class HSUE4SS : HSInstallable
     {
-        public HSUE4SS() : base("UE4SS", "https://github.com/UE4SS-RE/RE-UE4SS")
+        public override HSUtils.HSGameType CompatibleGameType
         {
+            get
+            {
+                return _compatibleGameType;
+            }
+            set
+            {
+                _compatibleGameType = value;
+                if (value == HSUtils.HSGameType.Playtest)
+                {
+                    // technically this only applies to UE4SS
+                    _isExperimental = true;
+                }
+                else if (value == HSUtils.HSGameType.Demo)
+                {
+                    _isExperimental = false;
+                }
+            }
+        }
+
+        public HSUE4SS() : base("UE4SS", "https://github.com/UE4SS-RE/RE-UE4SS", HSUtils.HSGameType.Demo)
+        {
+        }
+
+        public HSUE4SS(HSUtils.HSGameType compatibleGameType) : base("UE4SS", "https://github.com/UE4SS-RE/RE-UE4SS", compatibleGameType)
+        {
+            // This handles the basic distinction between the two versions of UE4SS for demo (stable UE4SS) and playtest (experimental UE4SS)
+        }
+
+
+        public HSUE4SS(string name, string url, HSUtils.HSGameType compatibleGameType, List<HSInstallable> dependencyGraph = null) : base (name, url, compatibleGameType, dependencyGraph )
+        {
+            // just a full constructor for whatever reason
         }
 
         public new const string RelativePath = "";
@@ -17,10 +57,170 @@ namespace HalfSwordModInstaller
         public new void LogMe()
         {
             HSUtils.Log($"UE4SS=\"{Name}\", Url=\"{Url}\", LatestVersion=\"{LatestVersion}\", " +
+                $"Experimental=\"{IsExperimental}\", " +
+                $"CompatibleGameType=\"{CompatibleGameType}\", " +
                 $"Downloaded={IsDownloaded}, Installed={IsInstalled}, " +
                 $"InstalledVersion={(string.IsNullOrEmpty(InstalledVersion) ? "null" : "\"" + InstalledVersion + "\"")}, " +
                 $"Enabled={IsEnabled}"
                 );
+        }
+
+        public void DownloadLatestExperimental()
+        {
+            // Example: Latest commit on main: g4fc8691
+            // Example: https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental/UE4SS_v3.0.1-234-g4fc8691.zip
+            // Latest workflow run result at: 
+            // https://api.github.com/repos/UE4SS-RE/RE-UE4SS/actions/workflows/experimental.yml/runs?status=success&per_page=1
+            // 
+            var commitSha = GetCommitHashOfLatestSuccessfulRun(Url);
+            var shortSha = commitSha.Substring(0, 7);
+            HttpClient client = new HttpClient();
+            try
+            {
+                var uri = new Uri(Url);
+                var segments = uri.Segments;
+                if (segments.Length < 3)
+                {
+                    HSUtils.Log($"[ERROR] Invalid GitHub repository URL \"{Url}\"");
+                    return;
+                }
+
+                string repoOwner = segments[1].TrimEnd('/');
+                string repoName = segments[2].TrimEnd('/');
+                string releaseTag = "experimental";
+                string apiUrl = $"https://api.github.com/repos/{repoOwner}/{repoName}/releases/tags/{releaseTag}";
+
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CSharpApp", "1.0"));
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = client.GetAsync(apiUrl).Result;
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var serializer = new JavaScriptSerializer();
+                var json = serializer.Deserialize<dynamic>(responseBody);
+
+                var assets = json["assets"];
+                foreach (var asset in assets)
+                {
+                    var fileName = asset["name"];
+                    Match assetNameMatch = Regex.Match(fileName, $@"^UE4SS_v(.*)-g{shortSha}.zip$");
+
+                    if (assetNameMatch.Success)
+                    {
+                        var downloadUrl = asset["browser_download_url"];
+                        HSUtils.Log($"File found: {fileName}\nDownload URL: {downloadUrl}");
+                        var url = new Uri(downloadUrl);
+
+                        var releaseZip = fileName;
+
+                        string downloadsFolder = Path.Combine(HSUtils.HSModInstallerDirPath, "downloads", Name, shortSha);
+                        if (!Directory.Exists(downloadsFolder))
+                        {
+                            Directory.CreateDirectory(downloadsFolder);
+                        }
+                        string releaseZipPath = Path.Combine(downloadsFolder, releaseZip);
+                        using (var dclient = new WebClient())
+                        {
+                            try
+                            {
+                                dclient.DownloadFile(downloadUrl, releaseZipPath);
+                                LocalZipPath = releaseZipPath;
+                                _isDownloaded = true;
+                                LatestVersion = shortSha;
+                                ReleaseArtifactName = releaseZip;
+                                HSUtils.Log($"Downloaded UE4SS experimental from \"{downloadUrl}\" to \"{releaseZipPath}\"");
+                            }
+                            catch (Exception ex)
+                            {
+                                HSUtils.Log($"[ERROR] Downloading of UE4SS experimental from \"{downloadUrl}\" to \"{releaseZipPath}\" failed:");
+                                HSUtils.Log(ex.Message);
+                                HSUtils.Log(ex.StackTrace);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                HSUtils.Log($"[ERROR] A HTTP request error occurred while obtaining experimental UE4SS build in: {e.Message}");
+                HSUtils.Log(e.StackTrace);
+            }
+        }
+
+        public static string GetCommitHashOfLatestSuccessfulRun(string repoUrl)
+        {
+            HttpClient client = new HttpClient();
+            string workflowPath = "experimental.yml";
+
+            var uri = new Uri(repoUrl);
+            var segments = uri.Segments;
+            if (segments.Length < 3)
+            {
+                HSUtils.Log($"[ERROR] Invalid GitHub repository URL \"{repoUrl}\"");
+                return null;
+            }
+
+            string repoOwner = segments[1].TrimEnd('/');
+            string repoName = segments[2].TrimEnd('/');
+
+            string apiUrl = $"https://api.github.com/repos/{repoOwner}/{repoName}/actions/workflows/{workflowPath}/runs?status=success&per_page=1";
+
+            client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("CSharpApp", "1.0"));
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            try
+            {
+                HttpResponseMessage response = client.GetAsync(apiUrl).Result;
+                if (response.StatusCode == HttpStatusCode.Forbidden && response.ReasonPhrase == "rate limit exceeded")
+                {
+                    HSUtils.Log($"[ERROR] GitHub API rate limit exceeded, please wait at least 1 hour and try again.");
+                    MessageBox.Show("GitHub API rate limit exceeded, please wait at least 1 hour and try again", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                var serializer = new JavaScriptSerializer();
+                var json = serializer.Deserialize<dynamic>(responseBody);
+
+                var workflowRun = json["workflow_runs"][0];
+                //var runId = workflowRun["id"];
+                //var conclusion = workflowRun["conclusion"];
+                //var runDate = workflowRun["created_at"];
+                //var run_number = workflowRun["run_number"];
+                var head_sha = workflowRun["head_sha"];
+                return head_sha;
+            }
+            catch (HttpRequestException e)
+            {
+                HSUtils.Log($"[ERROR] A HTTP request error occurred while obtaining experimental UE4SS build in: {e.Message}");
+                HSUtils.Log(e.StackTrace);
+                return null;
+            }
+            catch (Exception e)
+            {
+                HSUtils.Log($"[ERROR] An error occurred while obtaining experimental UE4SS build in: {e.Message}");
+                HSUtils.Log(e.StackTrace);
+                return null;
+            }
+        }
+
+        public override string GetLatestCommit(string repoUrl)
+        {
+            return GetCommitHashOfLatestSuccessfulRun(repoUrl);
+        }
+
+        public override void Download()
+        {
+            if (IsExperimental)
+            {
+                DownloadLatestExperimental();
+            }
+            else
+            {
+                base.Download();
+            }
         }
 
         public override void Install(bool forceInstallDependencies = false)
@@ -57,7 +257,7 @@ namespace HalfSwordModInstaller
             }
             // patch "GraphicsAPI = opengl" into d3d11 in UE4SS-settings.ini\
             // No idea which is the correct one, d3d11 or dx11, but opengl surely leads to a white screen in UE4SS, so patching
-            var UE4SSSettingsIni = Path.Combine(HSUtils.HSBinaryPath, "UE4SS-settings.ini");
+            var UE4SSSettingsIni = HSUtils.HSUE4SSSettingsIni;
             try
             {
                 var lines = File.ReadAllLines(UE4SSSettingsIni).ToList();
@@ -103,6 +303,7 @@ namespace HalfSwordModInstaller
             };
             string[] dirPaths =
             {
+                "ue4ss", // new version of UE4SS, wipes mods too as they are in ue4ss/Mods
                 "Mods",
                 "Cache"
             };
@@ -174,6 +375,19 @@ namespace HalfSwordModInstaller
                     InstalledVersion = "v3.x.x";
                     // Version = InstalledVersion;
                 }
+                else if (
+                    File.Exists(Path.Combine(HSUtils.HSBinaryPath, "dwmapi.dll"))
+                    && Directory.Exists(Path.Combine(HSUtils.HSBinaryPath, "ue4ss"))
+                    && File.Exists(Path.Combine(HSUtils.HSBinaryPath, "ue4ss", "UE4SS.dll"))
+                )
+                {
+                    // This is a new version of UE4SS, where the DLL is in a subfolder
+                    _isInstalled = true;
+                    // TODO dangerous, should probably detect a real version somehow
+                    InstalledVersion = "v3.x.x";
+                    // Version = InstalledVersion;
+                    // TODO validate against isExperimental / compatibleGameType
+                }
                 else
                 {
                     _isInstalled = false;
@@ -197,7 +411,9 @@ namespace HalfSwordModInstaller
                     (
                         File.Exists(Path.Combine(HSUtils.HSBinaryPath, "dwmapi.dll"))
                         || File.Exists(Path.Combine(HSUtils.HSBinaryPath, "UE4SS.dll"))
-                    ))
+                        || File.Exists(Path.Combine(HSUtils.HSBinaryPath, "ue4ss", "UE4SS.dll"))
+                    )
+                )
                 {
                     HSUtils.Log($"[ERROR] two versions of UE4SS are installed at the same time!");
                     InstalledVersion = null;

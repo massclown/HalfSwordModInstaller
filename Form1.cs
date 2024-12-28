@@ -17,6 +17,7 @@ namespace HalfSwordModInstaller
     public partial class Form1 : Form
     {
         public BindingList<HSInstallable> mods;
+        private List<DataGridViewColumn> dataGridView1ColumnsBackup;
 
         public Form1()
         {
@@ -46,56 +47,32 @@ namespace HalfSwordModInstaller
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void populateMods()
         {
-            // TODO this is bad, but we don't have a better path to extract the Steam and Half Sword installation state
-            string HSPath = HSUtils.HSBinaryPath;
-            if (HSPath == null)
-            {
-                MessageBox.Show("Could not find Steam or Half Sword Demo, exiting.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-                // Not really useful, but still
-                return;
-            }
-            else
-            {
-                HSUtils.Log($"Steam install path found for Half Sword: \"{HSPath}\"");
-            }
-
-            if (HSUtils.IsRunningAsAdmin())
-            {
-                HSUtils.Log($"[WARNING] Installer running as admin!");
-            }
-
-            if (HSUtils.IsHalfSwordRunning())
-            {
-                MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-                return;
-            }
-
-            if (HSUtils.IsAnotherInstallerRunning())
-            {
-                MessageBox.Show($"Another mod installer is running, please exit that installer and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.Close();
-                return;
-            }
-
+            RestoreDataGridView1Columns();
             // TODO have the list of mods downloaded from somewhere. Hardcoding it for now
             // TODO define the dependencies by name instead of by actual HSInstallable object
 
             mods = new BindingList<HSInstallable>();
-            HSUE4SS UE4SS = new HSUE4SS();
+            HSUE4SS UE4SS = new HSUE4SS(HSUtils.ChosenGameType);
             mods.Add(UE4SS);
             UE4SS.LogMe();
 
-            HSMod HSTM = new HSMod("HalfSwordTrainerMod", "https://github.com/massclown/HalfSwordTrainerMod", true, new List<HSInstallable>() { UE4SS });
-            mods.Add(HSTM);
-            HSTM.LogMe();
-
-            HSMod HSSSM = new HSMod("HalfSwordSplitScreenMod", "https://github.com/massclown/HalfSwordSplitScreenMod", false, new List<HSInstallable>() { UE4SS });
-            mods.Add(HSSSM);
-            HSSSM.LogMe();
+            if (HSUtils.ChosenGameType == HSUtils.HSGameType.Demo)
+            {
+                HSMod HSTM = new HSMod("HalfSwordTrainerMod", "https://github.com/massclown/HalfSwordTrainerMod", HSUtils.HSGameType.Demo, true, new List<HSInstallable>() { UE4SS });
+                mods.Add(HSTM);
+                HSTM.LogMe();
+                HSMod HSSSM = new HSMod("HalfSwordSplitScreenMod", "https://github.com/massclown/HalfSwordSplitScreenMod", HSUtils.ChosenGameType, false, new List<HSInstallable>() { UE4SS });
+                mods.Add(HSSSM);
+                HSSSM.LogMe();
+            }
+            else if (HSUtils.ChosenGameType == HSUtils.HSGameType.Playtest)
+            {
+                HSMod HSTM = new HSMod("HalfSwordTrainerMod", "https://github.com/massclown/HalfSwordTrainerMod-playtest", HSUtils.HSGameType.Playtest, false, new List<HSInstallable>() { UE4SS });
+                mods.Add(HSTM);
+                HSTM.LogMe();
+            }
 
             bindingSource1.DataSource = mods;
 
@@ -146,14 +123,62 @@ namespace HalfSwordModInstaller
             //bindingSource1?.ResetBindings(false);
             //dataGridView1.Refresh();
             StatusStipTextUpdate();
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            BackupDataGridView1Columns();
+            // By this time, HSUtils should have detected the installed games and asked the user to select the correct one in case of doubt
+            this.radioButton1demo.Checked = HSUtils.ChosenGameType == HSUtils.HSGameType.Demo;
+            this.radioButton2playtest.Checked = HSUtils.ChosenGameType == HSUtils.HSGameType.Playtest;
+            // TODO this is bad, but we don't have a better path to extract the Steam and Half Sword installation state
+            string HSPath = HSUtils.HSBinaryPath;
+            if (HSPath == null)
+            {
+                MessageBox.Show("Could not find Steam or Half Sword Demo, exiting.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                // Not really useful, but still
+                return;
+            }
+            else
+            {
+                HSUtils.Log($"Steam install path found for Half Sword: \"{HSPath}\"");
+            }
+
+            if (HSUtils.IsRunningAsAdmin())
+            {
+                HSUtils.Log($"[WARNING] Installer running as admin!");
+            }
+
+            if (HSUtils.IsHalfSwordRunning())
+            {
+                MessageBox.Show($"Half Sword is running, please exit the game and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            if (HSUtils.IsAnotherInstallerRunning())
+            {
+                MessageBox.Show($"Another mod installer is running, please exit that installer and try again!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            populateMods();
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            // This is to handle click on checkboxes for IsExperimental
+            bool skipRefresh = false;
             if (e.RowIndex < dataGridView1.RowCount && e.RowIndex >= 0 &&
                 e.ColumnIndex < dataGridView1.ColumnCount && e.ColumnIndex >= 0)
             {
                 var currentCell = dataGridView1[e.ColumnIndex, e.RowIndex];
+                var row = dataGridView1.Rows[e.RowIndex];
+                var mod = (HSInstallable)row.DataBoundItem;
+
                 if (currentCell is DataGridViewButtonCell buttonCell)
                 {
                     if (HSUtils.IsRunningAsAdmin())
@@ -178,8 +203,7 @@ namespace HalfSwordModInstaller
                         return;
                     }
 
-                    var row = dataGridView1.Rows[e.RowIndex];
-                    var mod = (HSInstallable)row.DataBoundItem;
+
                     switch (dataGridView1.Columns[e.ColumnIndex].Name)
                     {
                         case "downloadButton":
@@ -252,10 +276,17 @@ namespace HalfSwordModInstaller
                         Process.Start(cellUrl);
                     }
                 }
+                else if (currentCell is DataGridViewCheckBoxCell checkboxCell)
+                {
+                    //skipRefresh = true; 
+                }
             }
-            bindingSource1?.ResetBindings(false);
-            dataGridView1.Refresh();
-            StatusStipTextUpdate();
+            if (!skipRefresh)
+            {
+                bindingSource1?.ResetBindings(false);
+                dataGridView1.Refresh();
+                StatusStipTextUpdate();
+            }
         }
 
         private void dataGridView1_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -269,7 +300,14 @@ namespace HalfSwordModInstaller
                 {
                     if (dataGridView1.Columns[j].DataPropertyName.StartsWith("Is"))
                     {
-                        row.Cells[j].Style.BackColor = ((bool)row.Cells[j].Value) ? Color.LightGreen : Color.PaleVioletRed;
+                        if (dataGridView1.Columns[j].DataPropertyName == "IsExperimental")
+                        {
+                            row.Cells[j].Style.BackColor = ((bool)row.Cells[j].Value) ? Color.PaleVioletRed : Color.LightGreen;
+                        }
+                        else
+                        {
+                            row.Cells[j].Style.BackColor = ((bool)row.Cells[j].Value) ? Color.LightGreen : Color.PaleVioletRed;
+                        }
                     }
                 }
             }
@@ -478,7 +516,7 @@ namespace HalfSwordModInstaller
             }
             if (this.toolStripStatusLabel.Text.Length == 0)
             {
-                this.toolStripStatusLabel.Text = "Half Sword demo found, no mods installed";
+                this.toolStripStatusLabel.Text = "Half Sword " + (HSUtils.ChosenGameType == HSUtils.HSGameType.Demo? "Demo" : "Playtest") + " ready, no mods";
             }
         }
 
@@ -511,6 +549,71 @@ namespace HalfSwordModInstaller
             var image = this.pictureBox1.Image;
             image.RotateFlip(RotateFlipType.Rotate90FlipNone);
             this.pictureBox1.Image = image;
+        }
+
+        private void dataGridView1_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < dataGridView1.RowCount && e.RowIndex >= 0 &&
+                e.ColumnIndex < dataGridView1.ColumnCount && e.ColumnIndex >= 0)
+            {
+                var currentCell = dataGridView1[e.ColumnIndex, e.RowIndex];
+                var row = dataGridView1.Rows[e.RowIndex];
+                var mod = (HSInstallable)row.DataBoundItem;
+
+                if (currentCell is DataGridViewCheckBoxCell checkboxCell)
+                {
+                    bindingSource1?.ResetBindings(false);
+                    dataGridView1.Refresh();
+                    StatusStipTextUpdate();
+                }
+            }
+        }
+
+        private void radioButton1_CheckedChanged(object sender, EventArgs e)
+        {
+            handleGameTypeChange(sender, e);
+        }
+
+        private void radioButton2_CheckedChanged(object sender, EventArgs e)
+        {
+            handleGameTypeChange(sender, e);
+        }
+
+        private void handleGameTypeChange(object sender, EventArgs e)
+        {
+            if (radioButton1demo.Checked)
+            {
+                HSUtils.ChosenGameType = HSUtils.HSGameType.Demo;
+            }
+            else
+            {
+                HSUtils.ChosenGameType = HSUtils.HSGameType.Playtest;
+            }
+            // TODO make sure HSUtils internals are updated
+            HSUtils.Log($"Game type changed to {HSUtils.ChosenGameType}");
+            HSUtils.recalculateGamePaths();
+            this.populateMods();
+            StatusStipTextUpdate();
+        }
+
+        private void BackupDataGridView1Columns()
+        {
+            dataGridView1ColumnsBackup = new List<DataGridViewColumn>();
+            foreach (DataGridViewColumn column in dataGridView1.Columns)
+            {
+                dataGridView1ColumnsBackup.Add(column);
+            }
+        }
+
+        private void RestoreDataGridView1Columns()
+        {
+            if (dataGridView1ColumnsBackup == null) return;
+
+            dataGridView1.Columns.Clear();
+            foreach (var column in dataGridView1ColumnsBackup)
+            {
+                dataGridView1.Columns.Add(column);
+            }
         }
     }
 }

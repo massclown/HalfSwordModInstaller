@@ -14,8 +14,8 @@ namespace HalfSwordModInstaller
         {
             get
             {
-                var modInstallPath = Path.Combine(HSUtils.HSBinaryPath, RelativePath);
-                if (Directory.Exists(Path.Combine(HSUtils.HSBinaryPath, RelativePath)))
+                var modInstallPath = Path.Combine(HSUtils.HSUE4SSPath, RelativePath);
+                if (Directory.Exists(modInstallPath))
                 {
                     // TODO this is a very crude way of detecting a development setup with symlinks, but works for now
                     var attrs = File.GetAttributes(modInstallPath);
@@ -204,9 +204,10 @@ namespace HalfSwordModInstaller
             }
         }
 
-        public HSMod(string name, string url, bool hasLogicMods, List<HSInstallable> dependencyGraph) : base(name, url, dependencyGraph)
+        public HSMod(string name, string url, HSUtils.HSGameType compatibleGameType, bool hasLogicMods, List<HSInstallable> dependencyGraph) : base(name, url, compatibleGameType, dependencyGraph)
         {
             this.HasLogicMods = hasLogicMods;
+            // TODO handle game type/isExperimental
             this.RelativePath = $"Mods\\{Name}";
         }
 
@@ -215,6 +216,8 @@ namespace HalfSwordModInstaller
             HSUtils.Log($"Mod=\"{Name}\", Url=\"{Url}\", LatestVersion=\"{LatestVersion}\", " +
                 $"Downloaded={IsDownloaded}, Installed={IsInstalled}, " +
                 $"InstalledVersion={(string.IsNullOrEmpty(InstalledVersion) ? "null" : "\"" + InstalledVersion + "\"")}, " +
+                $"Experimental={IsExperimental}, " +
+                $"CompatibleGameType=\"{CompatibleGameType}\", " +
                 $"Enabled={IsEnabled}, " +
                 $"HasLogicMods={HasLogicMods}");
         }
@@ -249,7 +252,7 @@ namespace HalfSwordModInstaller
             {
                 Download();
             }
-            string unzipFolder = Path.Combine(HSUtils.HSBinaryPath, "Mods");
+            string unzipFolder = Path.Combine(HSUtils.HSUE4SSPath, "Mods");
             if (!Directory.Exists(unzipFolder))
             {
                 // TODO the installation is broken. Should probably bail out.
@@ -298,7 +301,7 @@ namespace HalfSwordModInstaller
 
         public override void Uninstall()
         {
-            var uninstallPath = Path.Combine(HSUtils.HSBinaryPath, RelativePath);
+            var uninstallPath = Path.Combine(HSUtils.HSUE4SSPath, RelativePath);
             HSUtils.Log($"Uninstalling mod \"{Name}\" from \"{uninstallPath}\"...");
             try
             {
@@ -326,6 +329,18 @@ namespace HalfSwordModInstaller
                 return;
             }
             HSUtils.Log($"Uninstalled mod \"{Name}\"");
+        }
+
+        public override void Download()
+        {
+            if (IsExperimental)
+            {
+                DownloadLatestBranch();
+            }
+            else
+            {
+                base.Download();
+            }
         }
 
         public override void SetEnabled(bool isEnabled = true)
