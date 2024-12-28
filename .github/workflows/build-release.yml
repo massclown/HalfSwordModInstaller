@@ -43,7 +43,7 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
         body: |
-          SHA256: `${{ env.RELEASE_SHA256 }}`
+          SHA256 of the installer: `${{ env.RELEASE_SHA256 }}`
 
     - name: Upload Release Asset
       id: upload-release
