@@ -41,6 +41,7 @@ or uninstall it by removing its files from the game folder.
 
 ## Supported mods
 * Half Sword Trainer Mod -- https://github.com/massclown/HalfSwordTrainerMod
+* Half Sword Trainer Mod for Playtest -- https://github.com/massclown/HalfSwordTrainerMod-playtest
 * Half Sword Split Screen Mod -- https://github.com/massclown/HalfSwordSplitScreenMod
 
 ## Notes
@@ -75,6 +76,23 @@ C:\Users\YOUR_USERNAME\AppData\Local\HalfSwordModInstaller\
 
 ```
 
+# Building this from source
+
+If you know what you are doing, or don't want to use the published binaries:
+
+1) Check out the repo locally
+2) Open the `*.sln` file in a recent version of Microsoft Visual Studio (2022 or so).
+3) Click "Build"
+
+Alternatively, you can use `msbuild` from MS SDK to generate the binary directly from the repo directory (in this example the version in the binary's resources is set to 0.5, but both these parameters can of course be omitted):
+
+```
+msbuild -t:rebuild -property:Configuration=Release -property:Version="0.5.0.0" -property:GitTag="v0.5"
+```
+
+This obviously requires the MS SDK is in the `%PATH%`, e.g. when launched from the VS command prompt.
+
+The binary will then appear in `\bin\Release\`
 
 # License
 
