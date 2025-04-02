@@ -55,11 +55,14 @@
             this.buttonCopyInstallerLog = new System.Windows.Forms.Button();
             this.buttonInstallerLog = new System.Windows.Forms.Button();
             this.buttonUninstallAll = new System.Windows.Forms.Button();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.radioButton1demo = new System.Windows.Forms.RadioButton();
             this.radioButton2playtest = new System.Windows.Forms.RadioButton();
+            this.checkBoxUE4SSDevBuild = new System.Windows.Forms.CheckBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.radioButton3demo04 = new System.Windows.Forms.RadioButton();
             this.statusStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -69,6 +72,7 @@
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
+            this.flowLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -182,7 +186,7 @@
             this.tableLayoutPanel1.Controls.Add(this.buttonCopyInstallerLog, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.buttonInstallerLog, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.buttonUninstallAll, 5, 3);
-            this.tableLayoutPanel1.Controls.Add(this.groupBox1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.flowLayoutPanel1, 0, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -233,13 +237,13 @@
             this.tableLayoutPanel1.SetColumnSpan(this.dataGridView1, 6);
             this.dataGridView1.DataSource = this.bindingSource1;
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView1.Location = new System.Drawing.Point(3, 97);
+            this.dataGridView1.Location = new System.Drawing.Point(3, 109);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(1362, 548);
+            this.dataGridView1.Size = new System.Drawing.Size(1362, 536);
             this.dataGridView1.TabIndex = 0;
             this.toolTip1.SetToolTip(this.dataGridView1, "List of all mods and their status");
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
@@ -383,17 +387,27 @@
             this.buttonUninstallAll.UseVisualStyleBackColor = false;
             this.buttonUninstallAll.Click += new System.EventHandler(this.buttonUninstallAll_Click);
             // 
+            // flowLayoutPanel1
+            // 
+            this.tableLayoutPanel1.SetColumnSpan(this.flowLayoutPanel1, 6);
+            this.flowLayoutPanel1.Controls.Add(this.groupBox1);
+            this.flowLayoutPanel1.Controls.Add(this.checkBoxUE4SSDevBuild);
+            this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(1362, 100);
+            this.flowLayoutPanel1.TabIndex = 9;
+            // 
             // groupBox1
             // 
             this.groupBox1.AutoSize = true;
             this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.tableLayoutPanel1.SetColumnSpan(this.groupBox1, 6);
+            this.groupBox1.Controls.Add(this.radioButton3demo04);
             this.groupBox1.Controls.Add(this.radioButton1demo);
             this.groupBox1.Controls.Add(this.radioButton2playtest);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(1362, 88);
+            this.groupBox1.Size = new System.Drawing.Size(349, 114);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Target game to mod:";
@@ -422,10 +436,35 @@
             this.radioButton2playtest.UseVisualStyleBackColor = true;
             this.radioButton2playtest.CheckedChanged += new System.EventHandler(this.radioButton2_CheckedChanged);
             // 
+            // checkBoxUE4SSDevBuild
+            // 
+            this.checkBoxUE4SSDevBuild.AutoSize = true;
+            this.checkBoxUE4SSDevBuild.Enabled = false;
+            this.checkBoxUE4SSDevBuild.Location = new System.Drawing.Point(358, 3);
+            this.checkBoxUE4SSDevBuild.Name = "checkBoxUE4SSDevBuild";
+            this.checkBoxUE4SSDevBuild.Size = new System.Drawing.Size(141, 20);
+            this.checkBoxUE4SSDevBuild.TabIndex = 9;
+            this.checkBoxUE4SSDevBuild.Text = "UE4SS Dev Build?";
+            this.toolTip1.SetToolTip(this.checkBoxUE4SSDevBuild, "Download a development build of UE4SS");
+            this.checkBoxUE4SSDevBuild.UseVisualStyleBackColor = true;
+            this.checkBoxUE4SSDevBuild.CheckedChanged += new System.EventHandler(this.checkBoxUE4SSDevBuild_CheckedChanged);
+            // 
             // backgroundWorker1
             // 
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            // 
+            // radioButton3demo04
+            // 
+            this.radioButton3demo04.AutoSize = true;
+            this.radioButton3demo04.Location = new System.Drawing.Point(6, 73);
+            this.radioButton3demo04.Name = "radioButton3demo04";
+            this.radioButton3demo04.Size = new System.Drawing.Size(199, 20);
+            this.radioButton3demo04.TabIndex = 8;
+            this.radioButton3demo04.TabStop = true;
+            this.radioButton3demo04.Text = "Half Sword Demo v0.4 (2025)";
+            this.radioButton3demo04.UseVisualStyleBackColor = true;
+            this.radioButton3demo04.CheckedChanged += new System.EventHandler(this.radioButton3demo04_CheckedChanged);
             // 
             // Form1
             // 
@@ -450,6 +489,8 @@
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
@@ -488,6 +529,9 @@
         private System.Windows.Forms.RadioButton radioButton1demo;
         private System.Windows.Forms.RadioButton radioButton2playtest;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.CheckBox checkBoxUE4SSDevBuild;
+        private System.Windows.Forms.RadioButton radioButton3demo04;
     }
 }
 

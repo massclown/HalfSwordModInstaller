@@ -34,10 +34,14 @@ namespace HalfSwordModInstaller
                 {
                     _isExperimental = false;
                 }
+                else if (value == HSUtils.HSGameType.Demo04)
+                {
+                    _isExperimental = true;
+                }
             }
         }
 
-        public HSUE4SS() : base("UE4SS", "https://github.com/UE4SS-RE/RE-UE4SS", HSUtils.HSGameType.Demo)
+        public HSUE4SS() : base("UE4SS", "https://github.com/UE4SS-RE/RE-UE4SS", HSUtils.HSGameType.Demo04)
         {
         }
 
@@ -54,6 +58,17 @@ namespace HalfSwordModInstaller
 
         public new const string RelativePath = "";
 
+        public bool IsDevBuild { 
+            get
+            {
+                return IsDevBuildInstalled();
+            }
+            set
+            {
+                IsDevBuild = value;
+            }
+        }
+
         public new void LogMe()
         {
             HSUtils.Log($"UE4SS=\"{Name}\", Url=\"{Url}\", LatestVersion=\"{LatestVersion}\", " +
@@ -61,6 +76,7 @@ namespace HalfSwordModInstaller
                 $"CompatibleGameType=\"{CompatibleGameType}\", " +
                 $"Downloaded={IsDownloaded}, Installed={IsInstalled}, " +
                 $"InstalledVersion={(string.IsNullOrEmpty(InstalledVersion) ? "null" : "\"" + InstalledVersion + "\"")}, " +
+                $"DevBuild=\"{IsDevBuild}\", " +
                 $"Enabled={IsEnabled}"
                 );
         }
@@ -104,7 +120,7 @@ namespace HalfSwordModInstaller
                 foreach (var asset in assets)
                 {
                     var fileName = asset["name"];
-                    Match assetNameMatch = Regex.Match(fileName, $@"^UE4SS_v(.*)-g{shortSha}.zip$");
+                    Match assetNameMatch = Regex.Match(fileName, $@"^{(IsDevBuild ? "zDEV-":"")}UE4SS_v(.*)-g{shortSha}.zip$");
 
                     if (assetNameMatch.Success)
                     {
@@ -375,8 +391,10 @@ namespace HalfSwordModInstaller
                     InstalledVersion = "v3.x.x";
                     // Version = InstalledVersion;
                 }
-                else if (
+                else if ((
                     File.Exists(Path.Combine(HSUtils.HSBinaryPath, "dwmapi.dll"))
+                    || File.Exists(Path.Combine(HSUtils.HSBinaryPath, "dwmapi.dll.bak"))
+                    )
                     && Directory.Exists(Path.Combine(HSUtils.HSBinaryPath, "ue4ss"))
                     && File.Exists(Path.Combine(HSUtils.HSBinaryPath, "ue4ss", "UE4SS.dll"))
                 )
@@ -400,6 +418,11 @@ namespace HalfSwordModInstaller
             {
                 _isInstalled |= value;
             }
+        }
+
+        public bool IsDevBuildInstalled()
+        {
+            return File.Exists(Path.Combine(HSUtils.HSBinaryPath, "UE4SS.pdb"));
         }
 
         public override bool IsBroken

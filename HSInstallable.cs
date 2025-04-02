@@ -133,6 +133,11 @@ namespace HalfSwordModInstaller
                 {
                     //_isExperimental = false;
                 }
+                else if (value == HSUtils.HSGameType.Demo04)
+                {
+                    //_isExperimental = true;
+                }
+
             }
         }
 

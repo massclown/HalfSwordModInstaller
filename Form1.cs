@@ -73,6 +73,12 @@ namespace HalfSwordModInstaller
                 mods.Add(HSTM);
                 HSTM.LogMe();
             }
+            else if (HSUtils.ChosenGameType == HSUtils.HSGameType.Demo04)
+            {
+                HSMod HSTM = new HSMod("HalfSwordTrainerMod", "https://github.com/massclown/HalfSwordTrainerMod-playtest", HSUtils.HSGameType.Demo04, false, new List<HSInstallable>() { UE4SS });
+                mods.Add(HSTM);
+                HSTM.LogMe();
+            }
 
             bindingSource1.DataSource = mods;
 
@@ -132,6 +138,7 @@ namespace HalfSwordModInstaller
             // By this time, HSUtils should have detected the installed games and asked the user to select the correct one in case of doubt
             this.radioButton1demo.Checked = HSUtils.ChosenGameType == HSUtils.HSGameType.Demo;
             this.radioButton2playtest.Checked = HSUtils.ChosenGameType == HSUtils.HSGameType.Playtest;
+            this.radioButton3demo04.Checked = HSUtils.ChosenGameType == HSUtils.HSGameType.Demo04;
             // TODO this is bad, but we don't have a better path to extract the Steam and Half Sword installation state
             string HSPath = HSUtils.HSBinaryPath;
             if (HSPath == null)
@@ -578,16 +585,23 @@ namespace HalfSwordModInstaller
         {
             handleGameTypeChange(sender, e);
         }
-
+        private void radioButton3demo04_CheckedChanged(object sender, EventArgs e)
+        {
+            handleGameTypeChange(sender, e);
+        }
         private void handleGameTypeChange(object sender, EventArgs e)
         {
             if (radioButton1demo.Checked)
             {
                 HSUtils.ChosenGameType = HSUtils.HSGameType.Demo;
             }
-            else
+            else if (radioButton2playtest.Checked)
             {
                 HSUtils.ChosenGameType = HSUtils.HSGameType.Playtest;
+            }
+            else if( radioButton3demo04.Checked)
+            {
+                HSUtils.ChosenGameType = HSUtils.HSGameType.Demo04;
             }
             // TODO make sure HSUtils internals are updated
             HSUtils.Log($"Game type changed to {HSUtils.ChosenGameType}");
@@ -615,5 +629,11 @@ namespace HalfSwordModInstaller
                 dataGridView1.Columns.Add(column);
             }
         }
+
+        private void checkBoxUE4SSDevBuild_CheckedChanged(object sender, EventArgs e)
+        {
+            HSUtils.HSUE4SSDevBuild = checkBoxUE4SSDevBuild.Checked;
+        }
+
     }
 }
