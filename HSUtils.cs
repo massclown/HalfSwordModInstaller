@@ -78,10 +78,12 @@ namespace HalfSwordModInstaller
 
             // Use regex to find all library paths
             var matches = Regex.Matches(libraryFoldersContent, "\"path\"\\s+\"(.+?)\"");
+            HSUtils.Log($"[INFO] Found Steam library paths: {matches.Count}");
 
             foreach (Match match in matches)
             {
                 string libraryPath = match.Groups[1].Value.Replace("\\\\", "\\");
+                HSUtils.Log($"[INFO] Scanning Steam library path \"{libraryPath}\"");
                 string appManifestPath = Path.Combine(libraryPath, "steamapps", $"appmanifest_{appId}.acf");
 
                 // Check if the appmanifest file exists which indicates the game is installed
@@ -97,11 +99,15 @@ namespace HalfSwordModInstaller
                         // Construct the full path to the game's install directory
                         return Path.Combine(libraryPath, "steamapps", "common", installDirMatch.Groups[1].Value);
                     }
-                    throw new InvalidOperationException($"[ERROR] installdir not found in Appmanifest file at \"{appManifestPath}\"");
+                    // Throwing exception here is a bad idea, let's continue scanning instead and rely on the exception at the end
+                    // throw new InvalidOperationException($"[ERROR] installdir not found in Appmanifest file at \"{appManifestPath}\"");
+                    HSUtils.Log($"[ERROR] installdir not found inside Appmanifest file at \"{appManifestPath}\"");
                 }
                 else
                 {
-                    throw new InvalidOperationException($"[ERROR] Appmanifest file not found at \"{appManifestPath}\"");
+                    // Throwing exception here is a bad idea, let's continue scanning instead and rely on the exception at the end
+                    // throw new InvalidOperationException($"[ERROR] Appmanifest file not found at \"{appManifestPath}\"");
+                    HSUtils.Log($"[ERROR] Appmanifest file not found at \"{appManifestPath}\"");
                 }
             }
 
